@@ -8,7 +8,7 @@ function hostInjector(str){
 
 	//Disable teams when switching modes it was automatically enabled
 	newStr = newStr.replace('G7p[0][2][m7p[4][702]]=S9L.W1E(116);', 'G7p[0][2][m7p[4][702]]=S9L.W1E(116);this.autoForcedTeams=!G7p[0][2][m7p[4][114]];');
-	newStr = newStr.replace('G7p[0][2][m7p[4][702]]=S9L.C1E(107);', 'G7p[0][2][m7p[4][702]]=S9L.C1E(107);'+AUTO_NO_TEAMS);
+	newStr = newStr.replace('G7p[1][m7p[4][663]]();', 'G7p[1][m7p[4][663]]();'+AUTO_NO_TEAMS);
 
 	//Add mode mutton to map suggestion message
 	newStr = newStr.replace('P1R[99][Y7p[2][624]]([Y7p[34]]);', 'P1R[99][Y7p[2][624]]([Y7p[34]]);' + SUGGESTION_MODE_BUTTON);
@@ -22,9 +22,11 @@ function hostInjector(str){
 }
 
 const AUTO_NO_TEAMS = `
-if(typeof(this) == "object" && this.autoForcedTeams) {
+if(typeof(this) == "object" && this.autoForcedTeams && G7p[0][2].mo != S9L.C1E(116)) {
 	this.autoForcedTeams = false;
 	G7p[0][2][m7p[4][114]] = false;
+	G7p[5][m7p[4][790]](G7p[0][2][m7p[4][702]],G7p[0][2][m7p[4][118]]);
+	G7p[1][m7p[4][663]]();
 	G7p[5][m7p[4][828]](G7p[0][2][m7p[4][114]]);
 	G7p[1][m7p[4][647]]();
 }`;
