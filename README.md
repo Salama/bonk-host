@@ -6,6 +6,7 @@ A browser extension to improve hosting oin bonk.io
 ## Features
 * Unlimited rounds
 * Automatically turns off forced teams from football
+* Adds a clickable mode suggestion to map request messages
 
 ## Installation instructions
 ### Firefox
