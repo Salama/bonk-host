@@ -1,5 +1,5 @@
 # bonk-playlists
-A browser extension to improve hosting oin bonk.io
+A browser extension to improve hosting on bonk.io
 
 [Discord link](https://discord.gg/Dj6usq7ww3)
 
