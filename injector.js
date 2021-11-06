@@ -16,11 +16,38 @@ function hostInjector(str){
 	newStr = newStr.replace('Y7p[9][Y7p[2][455]](Y7p[34]);', 'Y7p[9][Y7p[2][455]](Y7p[34]);'+APPEND_SUGGESTION_MODE_BUTTON);
 	//Handle new mode argument
 	newStr = newStr.replace('G7p[0][2][m7p[4][118]]=P1R[43][m7p[4][984]][m7p[8]];', 'G7p[0][2][m7p[4][118]]= typeof(m7p[0][0]) == "object" ? P1R[43][m7p[4][984]][m7p[8]] : m7p[0][0];');
+	
+	//Balance all
+	newStr = newStr.replace('t7V[6][t7V[3][645]]()', 't7V[6][t7V[3][645]]() || t7V[6] === "*" || t7V[7][0] == "/balanceall"');
+	newStr = newStr.replace('t7V[7][0] == S9L.W1E(1868)', 't7V[7][0] == S9L.W1E(1868) || t7V[7][0] == "/balanceall"');
+	newStr = newStr.replace('t7V[67]=t7V[97];break;', BALANCE_SELECTION);
+	newStr = newStr.replace('parseInt(t7V[7][2]);', 'parseInt(t7V[7][t7V[7][0] == "/balanceall" ? 1 : 2]);')
+	newStr = newStr.replace('if(t7V[95] == 0)', BALANCE_ALL_MESSAGE);
 	if(str === newStr) throw "Injection failed!";
 	console.log("Bonk Host injector run");
 	return newStr;
 }
 
+const BALANCE_ALL_MESSAGE = `
+if(t7V[67] == -2) {
+	j0V[69].showStatusMessage(S9L.C1E(1875) + "Everyone" + S9L.C1E(1877) + t7V[95], S9L.C1E(1870), false);
+}
+else if(t7V[95] == 0)
+`;
+
+const BALANCE_SELECTION = `
+
+j0V[23].bal[t7V[97]] = t7V[95];
+j0V[94][t7V[3][646]](t7V[97], t7V[95]);
+if (j0V[69]) {
+	j0V[69][t7V[3][647]]();
+}
+t7V[67]=-2;
+if(j0V[44][t7V[97]][t7V[3][568]][t7V[3][645]]() == t7V[6][t7V[3][645]]()) {
+t7V[67]=t7V[95];
+break;
+}
+`;
 const AUTO_NO_TEAMS = `
 if(typeof(this) == "object" && this.autoForcedTeams && G7p[0][2].mo != S9L.C1E(116)) {
 	this.autoForcedTeams = false;
