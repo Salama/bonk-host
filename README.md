@@ -7,6 +7,7 @@ A browser extension to improve hosting oin bonk.io
 * Unlimited rounds
 * Automatically turns off forced teams from football
 * Adds a clickable mode suggestion to map request messages
+* `/balanceall [amount]` and `/balance * [amount]` to balance everyone
 
 ## Installation instructions
 ### Firefox
