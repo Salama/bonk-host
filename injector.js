@@ -23,10 +23,24 @@ function hostInjector(str){
 	newStr = newStr.replace('t7V[67]=t7V[97];break;', BALANCE_SELECTION);
 	newStr = newStr.replace('parseInt(t7V[7][2]);', 'parseInt(t7V[7][t7V[7][0] == "/balanceall" ? 1 : 2]);')
 	newStr = newStr.replace('if(t7V[95] == 0)', BALANCE_ALL_MESSAGE);
+	
+	newStr = newStr.replace('if(t7V[7][0] == S9L.W1E(1868', CUSTOM_COMMANDS+'else if(t7V[7][0] == S9L.W1E(1868');
+	newStr = newStr.replace('j0V[69][t7V[3][644]](S9L.W1E(1896),S9L.C1E(1870),false);', 'j0V[69][t7V[3][644]](S9L.W1E(1896),S9L.C1E(1870),false);j0V[69][t7V[3][644]]("/hhelp - commands from host extension",S9L.C1E(1870),false);');
 	if(str === newStr) throw "Injection failed!";
 	console.log("Bonk Host injector run");
 	return newStr;
 }
+
+const CUSTOM_COMMANDS = `
+if(t7V[7][0] == "/hhelp") {
+	j0V[69][t7V[3][644]]("/balance * -100 to 100",S9L.C1E(1870),false);
+	j0V[69][t7V[3][644]]("/balanceall -100 to 100",S9L.C1E(1870),false);
+	j0V[69][t7V[3][644]]("/start",S9L.C1E(1870),false);
+}
+else if(t7V[7][0] == "/start") {
+	document.getElementById("newbonklobby_startbutton").click();
+}
+`;
 
 const BALANCE_ALL_MESSAGE = `
 if(t7V[67] == -2) {
