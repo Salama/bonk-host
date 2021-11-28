@@ -1,14 +1,14 @@
 #!/bin/bash
 name="Bonk Host"
 sname="bonk-host"
-version="1.4"
+version="1.5"
 description="Makes hosting rooms in bonk.io better"
 
 tmp0=$(mktemp)
 
 if [ ! -d build ]; then mkdir build; fi
 cd build
-rm "$sname".*
+rm -f "$sname".*
 
 csplit ../injector.js /\/\*\*\*REPLACERS\*\*\*/
 cat xx00 > "$tmp0"
@@ -38,3 +38,5 @@ cat ../mod/constants.js >> "$tmp0"
 cat xx01 | tail -n+2 >> "$tmp0"
 cat "$tmp0" | sed "s#/\*\*\*NAME\*\*\*/#$name#g" | sed "s#/\*\*\*SNAME\*\*\*/#$sname#g" | sed "s#/\*\*\*VERSION\*\*\*/#$version#g" | sed "s#/\*\*\*DESCRIPTION\*\*\*/#$description#g" > "$sname.js"
 rm xx00 xx01 "$tmp0" manifest.json injector.js loadInjector.js runInjectors.js background.js
+
+chmod 400 *
