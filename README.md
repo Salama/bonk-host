@@ -8,6 +8,7 @@ A browser extension to improve hosting on bonk.io
 * Adds a clickable mode suggestion to map request messages
 * `/balanceall [amount]` and `/balance * [amount]` to balance everyone
 * Mode dropdown menu
+* `/freejoin` to let people in without restarting the game
 
 ## Installation instructions
 ### Firefox
