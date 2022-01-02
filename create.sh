@@ -1,7 +1,7 @@
 #!/bin/bash
 name="Bonk Host"
 sname="bonk-host"
-version="1.5"
+version="1.6"
 description="Makes hosting rooms in bonk.io better"
 
 tmp0=$(mktemp)
