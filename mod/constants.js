@@ -1,11 +1,29 @@
+window.bonkHost = {};
+window.bonkHost.freejoin = false;
+
 let CUSTOM_COMMANDS = `
 if(t7V[7][0] == "/hhelp") {
-	j0V[69][t7V[3][644]]("/balance * -100 to 100",S9L.C1E(1870),false);
-	j0V[69][t7V[3][644]]("/balanceall -100 to 100",S9L.C1E(1870),false);
-	j0V[69][t7V[3][644]]("/start",S9L.C1E(1870),false);
+	j0V[69][t7V[3][644]]("/balance * -100 to 100 -- Balances everyone",S9L.C1E(1870),false);
+	j0V[69][t7V[3][644]]("/balanceall -100 to 100 -- Balances everyone",S9L.C1E(1870),false);
+	j0V[69][t7V[3][644]]("/start -- Starts the game",S9L.C1E(1870),false);
+	j0V[69][t7V[3][644]]("/freejoin on/off -- Lets people join during the game",S9L.C1E(1870),false);
 }
 else if(t7V[7][0] == "/start") {
 	document.getElementById("newbonklobby_startbutton").click();
+}
+else if(t7V[7][0] == "/freejoin") {
+    if(["true", "on", "yes", "enable"].includes(t7V[7][1])) {
+        window.bonkHost.freejoin = true;
+	    d8I("* Freejoin on",S9L.C1E(1870),true);
+    }
+    else if(["false", "off", "no", "disable"].includes(t7V[7][1])) {
+        window.bonkHost.freejoin = false;
+	    d8I("* Freejoin off",S9L.C1E(1870),true);
+    }
+    else if(t7V[7].length == 1) {
+        window.bonkHost.freejoin = !window.bonkHost.freejoin;
+	    d8I("* Freejoin " + (window.bonkHost.freejoin ? "on" : "off"),S9L.C1E(1870),true);
+    }
 }
 `;
 

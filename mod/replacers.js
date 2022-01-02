@@ -18,3 +18,6 @@ newStr = newStr.replace('if(t7V[95] == 0)', BALANCE_ALL_MESSAGE);
 
 newStr = newStr.replace('if(t7V[7][0] == S9L.W1E(1868', CUSTOM_COMMANDS+'else if(t7V[7][0] == S9L.W1E(1868');
 newStr = newStr.replace('j0V[69][t7V[3][644]](S9L.W1E(1896),S9L.C1E(1870),false);', 'j0V[69][t7V[3][644]](S9L.W1E(1896),S9L.C1E(1870),false);j0V[69][t7V[3][644]]("/hhelp - commands from host extension",S9L.C1E(1870),false);');
+
+//Let people join mid game
+newStr = newStr.replace('if(j0V[28]){j0V[27]', 'if(window.bonkHost.freejoin||j0V[28]){j0V[27]');
