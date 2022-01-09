@@ -1,61 +1,63 @@
 window.bonkHost = {};
+window.bonkHost.playerManagement = {};
 window.bonkHost.freejoin = false;
+window.bonkHost.playerCount = 0;
+window.bonkHost.scores = [];
+window.bonkHost.startGameFunction = () => {return;};
+
+let hostPlayerMenu = document.createElement('div');
+document.getElementById('pagecontainer').appendChild(hostPlayerMenu);
+hostPlayerMenu.outerHTML = `
+/***HOSTMENU_HTML***/
+`;
 
 let CUSTOM_COMMANDS = `
-if(t7V[7][0] == "/hhelp") {
-	j0V[69][t7V[3][644]]("/balance * -100 to 100 -- Balances everyone",S9L.C1E(1870),false);
-	j0V[69][t7V[3][644]]("/balanceall -100 to 100 -- Balances everyone",S9L.C1E(1870),false);
-	j0V[69][t7V[3][644]]("/start -- Starts the game",S9L.C1E(1870),false);
-	j0V[69][t7V[3][644]]("/freejoin on/off -- Lets people join during the game",S9L.C1E(1870),false);
+if(I8H[5][0] == "/hhelp") {
+	u6H[29].showStatusMessage("/balance * -100 to 100 -- Balances everyone","#cc3333",false);
+	u6H[29].showStatusMessage("/balanceall -100 to 100 -- Balances everyone","#cc3333",false);
+	u6H[29].showStatusMessage("/start -- Starts the game","#cc3333",false);
+	u6H[29].showStatusMessage("/freejoin on/off -- Lets people join during the game","#cc3333",false);
 }
-else if(t7V[7][0] == "/start") {
-	document.getElementById("newbonklobby_startbutton").click();
+else if(I8H[5][0] == "/start") {
+    window.bonkHost.startGame();
 }
-else if(t7V[7][0] == "/freejoin") {
-    if(["true", "on", "yes", "enable"].includes(t7V[7][1])) {
+else if(I8H[5][0] == "/freejoin") {
+    if(["true", "on", "yes", "enable"].includes(I8H[5][1])) {
         window.bonkHost.freejoin = true;
-	    d8I("* Freejoin on",S9L.C1E(1870),true);
+	    F5S("* Freejoin on","#cc3333",true);
     }
-    else if(["false", "off", "no", "disable"].includes(t7V[7][1])) {
+    else if(["false", "off", "no", "disable"].includes(I8H[5][1])) {
         window.bonkHost.freejoin = false;
-	    d8I("* Freejoin off",S9L.C1E(1870),true);
+	    F5S("* Freejoin off","#cc3333",true);
     }
-    else if(t7V[7].length == 1) {
+    else if(I8H[5].length == 1) {
         window.bonkHost.freejoin = !window.bonkHost.freejoin;
-	    d8I("* Freejoin " + (window.bonkHost.freejoin ? "on" : "off"),S9L.C1E(1870),true);
+	    F5S("* Freejoin " + (window.bonkHost.freejoin ? "on" : "off"),"#cc3333",true);
     }
+    document.getElementById('hostPlayerMenuFreejoin').checked = window.bonkHost.freejoin;
 }
 `;
 
 let BALANCE_ALL_MESSAGE = `
-if(t7V[67] == -2) {
-	j0V[69].showStatusMessage(S9L.C1E(1875) + "Everyone" + S9L.C1E(1877) + t7V[95], S9L.C1E(1870), false);
+if(I8H[67] == -2) {
+	u6H[29].showStatusMessage("* " + "Everyone" + " has had their buff/nerf set to " + I8H[32], "#cc3333", false);
 }
-else if(t7V[95] == 0)
+else if(I8H[32] == 0)
 `;
 
 let BALANCE_SELECTION = `
 
-j0V[23].bal[t7V[97]] = t7V[95];
-j0V[94][t7V[3][646]](t7V[97], t7V[95]);
-if (j0V[69]) {
-	j0V[69][t7V[3][647]]();
+u6H[36].bal[I8H[17]] = I8H[32];
+u6H[11].sendBalance(I8H[17], I8H[32]);
+if (u6H[29]) {
+	u6H[29].updatePlayers();
 }
-t7V[67]=-2;
-if(j0V[44][t7V[97]][t7V[3][568]][t7V[3][645]]() == t7V[6][t7V[3][645]]()) {
-t7V[67]=t7V[95];
-break;
+I8H[67]=-2;
+if (u6H[44][I8H[17]].userName.toLowerCase() == I8H[7].toLowerCase()) {
+    I8H[67] = I8H[17];
+    break;
 }
 `;
-let AUTO_NO_TEAMS = `
-if(typeof(this) == "object" && this.autoForcedTeams && G7p[0][2].mo != S9L.C1E(116)) {
-	this.autoForcedTeams = false;
-	G7p[0][2][m7p[4][114]] = false;
-	G7p[5][m7p[4][790]](G7p[0][2][m7p[4][702]],G7p[0][2][m7p[4][118]]);
-	G7p[1][m7p[4][663]]();
-	G7p[5][m7p[4][828]](G7p[0][2][m7p[4][114]]);
-	G7p[1][m7p[4][647]]();
-}`;
 
 let SUGGESTION_MODE_BUTTON = `
 let space = document.createElement("span");
@@ -66,19 +68,19 @@ let smb = document.createElement("span");
 smb.classList.add("newbonklobby_mapsuggest_high");
 smb.classList.add("newbonklobby_chat_link");
 smb.style.color="#ff0000";
-P1R[99].setButtonSounds([smb]);
+v2k[79].setButtonSounds([smb]);
 
 smb.onclick = () => {
-	Y7p[34].onclick();
-	window.bonkSetMode(G7p[7][Y7p[34].suggestID].m.mo);
+	d9G[73].onclick();
+	window.bonkSetMode(w3G[2][d9G[73].suggestID].m.mo);
 };
 `;
 
 let APPEND_SUGGESTION_MODE_BUTTON = `
-if(!!P1R[43].modes[G7p[7][Y7p[34].suggestID].m.mo]) {
-	Y7p[9].appendChild(space);
-	smb.appendChild(document.createTextNode("[" + P1R[43].modes[G7p[7][Y7p[34].suggestID].m.mo].lobbyName + "]"));
-	Y7p[9].appendChild(smb);
+if(!!v2k[10].modes[w3G[2][d9G[73].suggestID].m.mo]) {
+	d9G[8].appendChild(space);
+	smb.appendChild(document.createTextNode("[" + v2k[10].modes[w3G[2][d9G[73].suggestID].m.mo].lobbyName + "]"));
+	d9G[8].appendChild(smb);
 }
 `;
 
@@ -158,3 +160,77 @@ window.createModeDropdown = () => {
 
     document.getElementById("newbonklobby_settingsbox").appendChild(dropdown);
 };
+
+let PLAYER_CLICK_MENU = `
+if(playerEntry) {
+    playerEntry.parentNode.appendChild(m9G[6]);
+}
+else` + " ";
+
+let KEEP_SCORES = `
+if(window.bonkHost.scores.length > 0 && document.getElementById('hostPlayerMenuKeepScores').checked) {
+    k7k[1].scores = window.bonkHost.scores;
+}
+else` + " ";
+
+document.getElementById('hostPlayerMenuFreejoin').addEventListener('change', (e) => {
+    window.bonkHost.freejoin = e.target.checked;
+});
+
+document.getElementById('hostPlayerMenuTeamlock').addEventListener('change', () => {
+    document.getElementById('newbonklobby_teamlockbutton').onclick();
+});
+
+window.bonkHost.playerManagement.addPlayer = (playerEntry, info) => {
+    let newPlayerEntry = playerEntry.cloneNode(true);
+    newPlayerEntry.classList.remove('newbonklobby_playerentry_half');
+    newPlayerEntry.getElementsByClassName("newbonklobby_playerentry_ping")[0].remove();
+    newPlayerEntry.getElementsByClassName("newbonklobby_playerentry_host")[0].remove();
+    newPlayerEntry.onclick = playerEntry.onclick;
+    if(info.team == 0) {
+        newPlayerEntry.style.filter = "opacity(0.4)";
+    }
+    hostPlayerMenuBox.appendChild(newPlayerEntry);
+}
+window.bonkHost.playerManagement.removePlayer = (playerEntry) => {
+    if((foundPlayerEntry = window.bonkHost.playerManagement.getPlayer(playerEntry)) && foundPlayerEntry)
+    hostPlayerMenuBox.removeChild(foundPlayerEntry);
+}
+
+window.bonkHost.playerManagement.show = () => {
+    if(window.bonkHost.menuFunctions.visible) return;
+    parent.document.getElementById("adboxverticalleftCurse").style.display = "none";
+    document.getElementById('hostPlayerMenu').style.removeProperty("display");
+}
+
+window.bonkHost.playerManagement.hide = () => {
+    document.getElementById('hostPlayerMenu').style.display = "none";
+    parent.document.getElementById("adboxverticalleftCurse").style.removeProperty("display");
+}
+
+window.bonkHost.playerManagement.getPlayer = (playerEntry, exact = false) => {
+    if (exact) {
+        let child = [...hostPlayerMenuBox.children].indexOf(playerEntry);
+        if(child) return hostPlayerMenuBox.children[child];
+    }
+    for(let child of hostPlayerMenuBox.children) {
+        if(child.children[1].innerText == playerEntry.children[1].innerText
+        && child.children[1].innerText == playerEntry.children[1].innerText) {
+            return child;
+        }
+    }
+    return false;
+}
+
+window.bonkHost.playerManagement.movePlayer = (playerID, playerCount, team) => {
+    window.bonkHost.menuFunctions.visible = true;
+    if(team > 0)
+        window.bonkHost.bonkHandlers.hostHandlePlayerJoined(playerID, playerCount, team);
+    else
+        window.bonkHost.bonkHandlers.hostHandlePlayerLeft(playerID);
+    window.bonkHost.menuFunctions.updatePlayers();
+}
+
+window.bonkHost.startGame = () => {
+    window.bonkHost.startGameFunction();
+}

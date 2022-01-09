@@ -9,6 +9,7 @@ A browser extension to improve hosting on bonk.io
 * `/balanceall [amount]` and `/balance * [amount]` to balance everyone
 * Mode dropdown menu
 * `/freejoin` to let people in without restarting the game
+* Player management menu for host in game
 
 ## Installation instructions
 ### Firefox
