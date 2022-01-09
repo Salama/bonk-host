@@ -4,7 +4,7 @@ newStr = newStr.replace(/...\[[0-9]\]\[[0-9]\]\[...\[[0-9]\]\[[0-9]?[0-9]?[0-9]\
 
 //Mode selection menu
 newStr = newStr.replace(modeStuff[0], `${modeStuff[0]};window.bonkModesObject=${modesObject};window.bonkSetMode=m=>{${modeStuff[1]}${modeVar}=m;${modeStuff[3]}};window.createModeDropdown();`);
-//Add mode mutton to map suggestion message
+//Add mode button to map suggestion message
 newStr = newStr.replace('v2k[79][d9G[3][624]]([d9G[73]]);', 'v2k[79][d9G[3][624]]([d9G[73]]);' + SUGGESTION_MODE_BUTTON);
 //Append mode button
 newStr = newStr.replace('d9G[8][d9G[3][455]](d9G[73]);', 'd9G[8][d9G[3][455]](d9G[73]);'+APPEND_SUGGESTION_MODE_BUTTON);
