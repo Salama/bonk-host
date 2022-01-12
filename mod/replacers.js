@@ -87,4 +87,4 @@ newStr = newStr.replace('C0z(G9b.A43(2039));', 'C0z(G9b.A43(2039));' + 'window.b
 newStr = newStr.replace('if(w3G[0][2][V9G[1][662]])', 'document.getElementById("hostPlayerMenuTeamlock").checked=w3G[0][2].tl;' + 'if(w3G[0][2][V9G[1][662]])');
 
 //Handle an error when clicking host menu. MIGHT BREAK IN RARE CASES WITH OTHER MODS because it's missing {}, but it should be fine
-newStr = newStr.replace('t9G[5]=v8yy;', 't9G[5]=v8yy;' + 'if(w3G[26][t9G[5][1372]]!=null)');
+newStr = newStr.replace('t9G[5]=v8yy;', 't9G[5]=v8yy;' + 'if(w3G[26].element!=null)');

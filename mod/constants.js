@@ -182,6 +182,9 @@ document.getElementById('hostPlayerMenuTeamlock').addEventListener('change', () 
 });
 
 window.bonkHost.playerManagement.addPlayer = (playerEntry, info) => {
+    while(window.bonkHost.playerManagement.getPlayer(playerEntry)) {
+        window.bonkHost.playerManagement.removePlayer(playerEntry);
+    }
     let newPlayerEntry = playerEntry.cloneNode(true);
     newPlayerEntry.classList.remove('newbonklobby_playerentry_half');
     newPlayerEntry.getElementsByClassName("newbonklobby_playerentry_ping")[0].remove();
