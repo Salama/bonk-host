@@ -202,13 +202,15 @@ window.bonkHost.playerManagement.removePlayer = (playerEntry) => {
 
 window.bonkHost.playerManagement.show = () => {
     if(window.bonkHost.menuFunctions.visible) return;
-    parent.document.getElementById("adboxverticalleftCurse").style.display = "none";
+    if(parent.document.getElementById('adboxverticalleftCurse') != null)
+        parent.document.getElementById('adboxverticalleftCurse').style.display = "none";
     document.getElementById('hostPlayerMenu').style.removeProperty("display");
 }
 
 window.bonkHost.playerManagement.hide = () => {
     document.getElementById('hostPlayerMenu').style.display = "none";
-    parent.document.getElementById("adboxverticalleftCurse").style.removeProperty("display");
+    if(parent.document.getElementById('adboxverticalleftCurse') != null)
+        parent.document.getElementById('adboxverticalleftCurse').style.removeProperty("display");
 }
 
 window.bonkHost.playerManagement.getPlayer = (playerEntry, exact = false) => {
