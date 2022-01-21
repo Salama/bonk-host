@@ -219,8 +219,7 @@ window.bonkHost.playerManagement.getPlayer = (playerEntry, exact = false) => {
         if(child) return hostPlayerMenuBox.children[child];
     }
     for(let child of hostPlayerMenuBox.children) {
-        if(child.children[1].innerText == playerEntry.children[1].innerText
-        && child.children[1].innerText == playerEntry.children[1].innerText) {
+        if(child.children[1].textContent == playerEntry.children[1].textContent) {
             return child;
         }
     }
