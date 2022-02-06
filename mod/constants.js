@@ -2,8 +2,11 @@ window.bonkHost = {};
 window.bonkHost.playerManagement = {};
 window.bonkHost.freejoin = false;
 window.bonkHost.playerCount = 0;
+window.bonkHost.playerNames = [];
 window.bonkHost.scores = [];
 window.bonkHost.startGameFunction = () => {return;};
+
+window.bonkCommands = window.bonkCommands.concat(["/kick", "/mute", "/unmute", "/unmute", "/lock", "/unlock", "/balance", "/fav", "/unfav", "/curate", "/curateyes", "/curateno", "/hhelp", "/balanceall", "/start", "/freejoin"]);
 
 let hostPlayerMenuCSS = document.createElement('style');
 hostPlayerMenuCSS.innerHTML = `
@@ -200,10 +203,17 @@ window.bonkHost.playerManagement.addPlayer = (playerEntry, info) => {
         newPlayerEntry.style.filter = "opacity(0.4)";
     }
     hostPlayerMenuBox.appendChild(newPlayerEntry);
+    if(!window.bonkHost.playerNames.includes(newPlayerEntry.children[1].textContent)) {
+        window.bonkHost.playerNames.push(newPlayerEntry.children[1].textContent);
+    }
 }
 window.bonkHost.playerManagement.removePlayer = (playerEntry) => {
-    if((foundPlayerEntry = window.bonkHost.playerManagement.getPlayer(playerEntry)) && foundPlayerEntry)
-    hostPlayerMenuBox.removeChild(foundPlayerEntry);
+    if((foundPlayerEntry = window.bonkHost.playerManagement.getPlayer(playerEntry)) && foundPlayerEntry) {
+        hostPlayerMenuBox.removeChild(foundPlayerEntry);
+    }
+    if(window.bonkHost.playerNames.includes(foundPlayerEntry.children[1].textContent)) {
+        window.bonkHost.playerNames.splice(window.bonkHost.playerNames.indexOf(foundPlayerEntry.children[1].textContent), 1);
+    }
 }
 
 window.bonkHost.playerManagement.show = () => {
@@ -267,3 +277,86 @@ window.bonkHost.playerManagement.movePlayer = (playerID, playerCount, team) => {
 window.bonkHost.startGame = () => {
     window.bonkHost.startGameFunction();
 }
+
+/*Autocomplete*/
+
+document.getElementById('newbonklobby_chat_input').onkeydown = e => {
+	if (e.keyCode === 9) {
+		e.preventDefault();
+		e.stopPropagation();
+		let chatText = e.target.value.split(' ');
+		let length = 0;
+		for (let i = 0; i < chatText.length; i++) {
+			length += chatText[i].length + 1;
+			if (length <= e.target.selectionStart || chatText[i] === "")
+				continue;
+			console.log(i);
+			foundAutocompletes = [];
+			foundAutocompletesOffsets = [];
+			for (let j = 0; j < window.bonkCommands.length; j++) {
+				if (window.bonkCommands[j].toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').match("^" + chatText[i].toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))) {
+					foundAutocompletes.push(window.bonkCommands[j]);
+					foundAutocompletesOffsets.push(0);
+					console.log(i + " " + window.bonkCommands[j]);
+				}
+			}
+			if (foundAutocompletes.length === 0) {
+				for (let j = 0; j < window.bonkHost.playerNames.length; j++) {
+					for (let k = i; k >= 0; k--) {
+						if (window.bonkHost.playerNames[j].toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').match("^" + chatText.slice(k, i + 1).join(" ").toLowerCase().replace(/"/g, "").replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))) {
+							foundAutocompletes.push(window.bonkHost.playerNames[j]);
+							foundAutocompletesOffsets.push(k);
+							console.log(i + " " + window.bonkHost.playerNames[j]);
+						}
+					}
+				}
+			}
+			if (foundAutocompletes.length === 1) {
+				let oldlen = chatText.slice(foundAutocompletesOffsets[0], i + 1).join(" ").length;
+				for (let j = i; j > foundAutocompletesOffsets[0]; j--) {
+					chatText.splice(j, 1);
+				}
+				if (chatText[0][0] === "/" && i > 0 && foundAutocompletes[0].includes(" ")) {
+					chatText[foundAutocompletesOffsets[0]] = `"${foundAutocompletes[0]}" `;
+				} else {
+					chatText[foundAutocompletesOffsets[0]] = foundAutocompletes[0] + (foundAutocompletesOffsets[0] === (chatText.length - 1) && (chatText[0][0] === "/") && (chatText[foundAutocompletesOffsets[0] + 1] !== "") ? " " : "");
+				}
+				if(chatText[foundAutocompletesOffsets[0] + 1] === "") {
+					chatText.splice(foundAutocompletesOffsets[0] + 1, 1);
+				}
+				e.target.value = chatText.join(' ');
+				e.target.selectionStart = length - oldlen + chatText[foundAutocompletesOffsets[0]].length + ((foundAutocompletesOffsets[0] === chatText.length - 1) && (chatText[0][0] !== "/") ? 0 : 1);
+				e.target.selectionEnd = length - oldlen + chatText[foundAutocompletesOffsets[0]].length + ((foundAutocompletesOffsets[0] === (chatText.length - 1)) && (chatText[0][0] !== "/") ? 1 : 0);
+				return;
+			} else if (foundAutocompletes.length > 1) {
+				let maxAutocomplete = "";
+				let char = "";
+				for (let j = 0; j >= 0; j++) {
+					maxAutocomplete += char;
+					console.log(char);
+					char = "";
+					for (let k = 0; k < foundAutocompletes.length; k++) {
+						if (char === "") char = foundAutocompletes[k][j];
+						else if (foundAutocompletes[k][j] !== char) {
+							j = -Infinity;
+							break;
+						}
+					}
+				}
+                if(maxAutocomplete === "") return;
+				let oldlen = chatText[i].length;
+				let quotes = (chatText[0][0] === "/" && foundAutocompletes.some(r => r.includes(" ")));
+				if (quotes) {
+					chatText[i] = `"${maxAutocomplete}"`;
+				} else {
+					chatText[i] = maxAutocomplete;
+				}
+				e.target.value = chatText.join(' ');
+				e.target.selectionStart = length - oldlen + chatText[i].length - quotes * 2;
+				e.target.selectionEnd = length - oldlen + chatText[i].length - quotes * 2;
+				return;
+			}
+		}
+	}
+}
+document.getElementById('ingamechatinputtext').onkeydown = document.getElementById('newbonklobby_chat_input').onkeydown;

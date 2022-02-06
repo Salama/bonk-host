@@ -65,9 +65,9 @@ newStr = newStr.replace('o9k[1][o9k[7][122]]=[0,0,0,0];', 'o9k[1][o9k[7][122]]='
 //Score counter
 newStr = newStr.replace('G9b.A2k(1000,b2k[6]);', 'G9b.A2k(1000,b2k[6]);window.bonkHost.scores=i2k[7][i2k[1]].scores;');
 
-//Update menu while in game if host
-newStr = newStr.replace('!this[h9G[9][481]]', '!this[h9G[9][481]] && w3G[3].getLSID() != w3G[3].hostID');
-newStr = newStr.replace('!this[V9G[1][481]]', '!this[V9G[1][481]] && w3G[3].getLSID() != w3G[3].hostID');
+//Update menu while in game
+newStr = newStr.replace('!this[h9G[9][481]]', '!this[h9G[9][481]] && false');
+newStr = newStr.replace('!this[V9G[1][481]]', '!this[V9G[1][481]] && false');
 
 //Show menu when in game if host
 newStr = newStr.replace('if(u6H[29]){u6H[29][w8H[9][722]]();}', 'if(u6H[29]){u6H[29][w8H[9][722]]();' + `if(u6H[11].hostID == u6H[11].getLSID())window.bonkHost.playerManagement.show();` + '}');
@@ -88,3 +88,6 @@ newStr = newStr.replace('if(w3G[0][2][V9G[1][662]])', 'document.getElementById("
 
 //Handle an error when clicking host menu. MIGHT BREAK IN RARE CASES WITH OTHER MODS because it's missing {}, but it should be fine
 newStr = newStr.replace('t9G[5]=v8yy;', 't9G[5]=v8yy;' + 'if(w3G[26].element!=null)');
+
+//Update menu when joined
+newStr = newStr.replaceAll('=u6H[30];', '=u6H[30];let oldVisibility=window.bonkHost.menuFunctions.visible;window.bonkHost.menuFunctions.visible=true;window.bonkHost.menuFunctions.updatePlayers();window.bonkHost.menuFunctions.visible = oldVisibility;');

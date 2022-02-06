@@ -9,8 +9,9 @@ function hostInjector(str){
 	return newStr;
 }
 
-if(!window.bonkCodeInjectors)
-window.bonkCodeInjectors = [];
+if(!window.bonkCommands) window.bonkCommands = [];
+
+if(!window.bonkCodeInjectors) window.bonkCodeInjectors = [];
 window.bonkCodeInjectors.push(bonkCode => {
 	try {
 		return hostInjector(bonkCode);

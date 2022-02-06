@@ -10,6 +10,7 @@ A browser extension to improve hosting on bonk.io
 * Mode dropdown menu
 * `/freejoin` to let people in without restarting the game
 * Player management menu for host in game
+* Command and playername autocompletion by pressing `tab`
 
 ## Installation instructions
 ### Firefox

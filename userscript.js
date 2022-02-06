@@ -23,6 +23,8 @@ let injector = (str) => {
 	return newStr;
 }
 
+if(!window.bonkCommands) window.bonkCommands = [];
+
 if(!window.bonkCodeInjectors) window.bonkCodeInjectors = [];
 window.bonkCodeInjectors.push(bonkCode => {
 	try {
