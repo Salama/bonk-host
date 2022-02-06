@@ -1,0 +1,30 @@
+#hostPlayerMenu {
+	background-color: #cfd8cd;
+	width: calc(35.2vw - 400px);
+	min-width: 154px;
+	max-width: 260px;
+	height: 551px;
+	position: absolute;
+	left: 1%;
+	top: 60px;
+	border-radius: 7px;
+	display: none;
+    transition: ease-in-out 100ms;
+}
+
+#hostPlayerMenuCollapse {
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    width: 26px;
+    height: 26px;
+    border-radius: 2px;
+    text-transform: full-width;
+    visibility: visible;
+}
+
+#hostPlayerMenuControls {
+    position:absolute;
+    bottom:0;
+    width:100%;
+}

@@ -5,6 +5,12 @@ window.bonkHost.playerCount = 0;
 window.bonkHost.scores = [];
 window.bonkHost.startGameFunction = () => {return;};
 
+let hostPlayerMenuCSS = document.createElement('style');
+hostPlayerMenuCSS.innerHTML = `
+/***HOSTMENU_CSS***/
+`;
+document.getElementsByTagName('head')[0].appendChild(hostPlayerMenuCSS);
+
 let hostPlayerMenu = document.createElement('div');
 document.getElementById('pagecontainer').appendChild(hostPlayerMenu);
 hostPlayerMenu.outerHTML = `
@@ -204,13 +210,36 @@ window.bonkHost.playerManagement.show = () => {
     if(window.bonkHost.menuFunctions.visible) return;
     if(parent.document.getElementById('adboxverticalleftCurse') != null)
         parent.document.getElementById('adboxverticalleftCurse').style.display = "none";
-    document.getElementById('hostPlayerMenu').style.removeProperty("display");
+    document.getElementById('hostPlayerMenu').style.display = "unset";
 }
 
 window.bonkHost.playerManagement.hide = () => {
     document.getElementById('hostPlayerMenu').style.display = "none";
     if(parent.document.getElementById('adboxverticalleftCurse') != null)
         parent.document.getElementById('adboxverticalleftCurse').style.removeProperty("display");
+}
+
+window.bonkHost.playerManagement.collapse = () => {
+    if(document.getElementById('hostPlayerMenu').style.visibility != "hidden") {
+        document.getElementById('hostPlayerMenuControls').style.display = "none";
+        document.getElementById('hostPlayerMenuControls').visibility = "hidden";
+        document.getElementById('hostPlayerMenu').style.minWidth = 0;
+        document.getElementById('hostPlayerMenu').style.minHeight = 0;
+        document.getElementById('hostPlayerMenu').style.width = 0;
+        document.getElementById('hostPlayerMenu').style.height = 0;
+        document.getElementById('hostPlayerMenu').style.visibility = "hidden";
+        document.getElementById('hostPlayerMenuCollapse').textContent = "+";
+    }
+    else {
+        document.getElementById('hostPlayerMenu').style.visibility = "visible";
+        document.getElementById('hostPlayerMenu').style.removeProperty("min-width");
+        document.getElementById('hostPlayerMenu').style.removeProperty("min-height");
+        document.getElementById('hostPlayerMenu').style.removeProperty("width");
+        document.getElementById('hostPlayerMenu').style.removeProperty("height");
+        document.getElementById('hostPlayerMenu').style.visibility = "visible";
+        document.getElementById('hostPlayerMenuCollapse').textContent = "-";
+        setTimeout(() => {document.getElementById('hostPlayerMenuControls').style.removeProperty("display");}, 100);
+    }
 }
 
 window.bonkHost.playerManagement.getPlayer = (playerEntry, exact = false) => {

@@ -20,6 +20,11 @@ cat xx00 > "$tmp0"
 cat ../mod/constants.js >> "$tmp0"
 cat xx01 | tail -n+2 >> "$tmp0"
 
+csplit "$tmp0" /\/\*\*\*HOSTMENU_CSS\*\*\*/
+cat xx00 > "$tmp0"
+cat ../mod/hostmenu.css >> "$tmp0"
+cat xx01 | tail -n+2 >> "$tmp0"
+
 csplit "$tmp0" /\/\*\*\*HOSTMENU_HTML\*\*\*/
 cat xx00 > "$tmp0"
 cat ../mod/hostmenu.html >> "$tmp0"

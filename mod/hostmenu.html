@@ -1,19 +1,9 @@
-<div class="windowShadow" id="hostPlayerMenu"
-	style="
-	background-color: #cfd8cd;
-	width: calc(35.2vw - 400px);
-	min-width: 154px;
-	max-width: 260px;
-	height: 551px;
-	position: absolute;
-	left: 1%;
-	top: calc(20% + 60px);
-	border-radius: 7px;
-	display: none">
-	
-	<div class="newbonklobby_boxtop newbonklobby_boxtop_classic" style="background-color: #009688;">Player List</div>
+<div class="windowShadow" id="hostPlayerMenu">
+	<div class="newbonklobby_boxtop newbonklobby_boxtop_classic" style="background-color: #009688;">
+		<div onclick="window.bonkHost.playerManagement.collapse();" id="hostPlayerMenuCollapse" class="newbonklobby_settings_button brownButton brownButton_classic buttonShadow">-</div>
+		Player List</div>
 	<div id="hostPlayerMenuBox" class="newbonklobby_elementcontainer"></div>
-	<div id="hostPlayerMenuControls" style="position:absolute;bottom:0;width:100%">
+	<div id="hostPlayerMenuControls">
 		<table>
 			<tbody>
 				<tr style="background-color: rgba(58, 58, 58, 0.07);">
@@ -42,7 +32,7 @@
 				</tr>
 			</tbody>
 		</table>
-		<div class="newbonklobby_settings_button brownButton brownButton_classic buttonShadow" style="width:100%" id="hostPlayerMenuRestartButton">
+		<div class="newbonklobby_settings_button brownButton brownButton_classic buttonShadow" style="width:100%;" id="hostPlayerMenuRestartButton">
 			RESTART GAME
 		</div>
 	</div>
