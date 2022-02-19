@@ -27,10 +27,10 @@ if(I8H[5][0] == "/hhelp") {
 	u6H[29].showStatusMessage("/start -- Starts the game","#cc3333",false);
 	u6H[29].showStatusMessage("/freejoin on/off -- Lets people join during the game","#cc3333",false);
 }
-else if(I8H[5][0] == "/start") {
+else if(I8H[5][0] == "/start" && !u6H[64]) {
     window.bonkHost.startGame();
 }
-else if(I8H[5][0] == "/freejoin") {
+else if(I8H[5][0] == "/freejoin" && !u6H[64]) {
     if(["true", "on", "yes", "enable"].includes(I8H[5][1])) {
         window.bonkHost.freejoin = true;
 	    F5S("* Freejoin on","#cc3333",true);

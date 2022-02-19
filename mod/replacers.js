@@ -90,4 +90,4 @@ newStr = newStr.replace('if(w3G[0][2][V9G[1][662]])', 'document.getElementById("
 newStr = newStr.replace('t9G[5]=v8yy;', 't9G[5]=v8yy;' + 'if(w3G[26].element!=null)');
 
 //Update menu when joined
-newStr = newStr.replaceAll('=u6H[30];', '=u6H[30];let oldVisibility=window.bonkHost.menuFunctions.visible;window.bonkHost.menuFunctions.visible=true;window.bonkHost.menuFunctions.updatePlayers();window.bonkHost.menuFunctions.visible = oldVisibility;');
+newStr = newStr.replaceAll('=u6H[30];', '=u6H[30];if(!u6H[64]){let oldVisibility=window.bonkHost.menuFunctions.visible;window.bonkHost.menuFunctions.visible=true;window.bonkHost.menuFunctions.updatePlayers();window.bonkHost.menuFunctions.visible = oldVisibility;}');
