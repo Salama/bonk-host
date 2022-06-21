@@ -1,7 +1,7 @@
 #!/bin/bash
 name="Bonk Host"
 sname="bonk-host"
-version="1.11"
+version="1.12"
 description="Makes hosting rooms in bonk.io better"
 
 tmp0=$(mktemp)
@@ -60,7 +60,7 @@ cat xx00 > "$tmp0"
 cat ../mod/hostmenu.html >> "$tmp0"
 cat xx01 | tail -n+2 >> "$tmp0"
 
-cat "$tmp0" | sed "s#/\*\*\*NAME\*\*\*/#$name#g" | sed "s#/\*\*\*SNAME\*\*\*/#$sname#g" | sed "s#/\*\*\*VERSION\*\*\*/#$version#g" | sed "s#/\*\*\*DESCRIPTION\*\*\*/#$description#g" > "$sname.js"
+cat "$tmp0" | sed "s#/\*\*\*NAME\*\*\*/#$name#g" | sed "s#/\*\*\*SNAME\*\*\*/#$sname#g" | sed "s#/\*\*\*VERSION\*\*\*/#$version#g" | sed "s#/\*\*\*DESCRIPTION\*\*\*/#$description#g" > "$sname.user.js"
 
 rm xx00 xx01 "$tmp0" manifest.json injector.js loadInjector.js runInjectors.js background.js
 

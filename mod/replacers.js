@@ -17,10 +17,13 @@ newStr = newStr.replace('parseInt(I8H[5][2]);', 'parseInt(I8H[5][I8H[5][0] == "/
 newStr = newStr.replace('if(I8H[32] == 0)', BALANCE_ALL_MESSAGE);
 
 newStr = newStr.replace('if(I8H[5][0] == G9b.z43(1869)', CUSTOM_COMMANDS+'else if(I8H[5][0] == G9b.z43(1869)');
-newStr = newStr.replace('u6H[29][I8H[1][644]](G9b.A43(1897),G9b.z43(1871),false);', 'u6H[29][I8H[1][644]](G9b.A43(1897),G9b.z43(1871),false);u6H[29].showStatusMessage("/hhelp - commands from host extension","#cc3333",false);');
+newStr = newStr.replace('u6H[29][I8H[1][644]](G9b.A43(1897),G9b.z43(1871),false);', 'u6H[29][I8H[1][644]](G9b.A43(1897),G9b.z43(1871),false);u6H[29].showStatusMessage("/hhelp - commands from host mod","#cc3333",false);');
+
+//Internal var
+newStr = newStr.replace('function I8yy(){}', 'function I8yy(){}'+'I8yy.bonkHost={};');
 
 //Let people join mid game
-newStr = newStr.replace('if(u6H[64]){u6H[30]', 'if(window.bonkHost.freejoin||u6H[64]){u6H[30]');
+newStr = newStr.replace('if(u6H[64]){u6H[30]', FREEJOIN + 'u6H[30]');
 
 /////////////
 //Host menu//
@@ -73,8 +76,9 @@ newStr = newStr.replace('!this[V9G[1][481]]', '!this[V9G[1][481]] && false');
 newStr = newStr.replace('if(u6H[29]){u6H[29][w8H[9][722]]();}', 'if(u6H[29]){u6H[29][w8H[9][722]]();' + `if(u6H[11].hostID == u6H[11].getLSID())window.bonkHost.playerManagement.show();` + '}');
 
 //Hide menu when not in game
-newStr = newStr.replace('w1G[5]=v8yy;', 'w1G[5]=v8yy;' + 'window.bonkHost.playerManagement.hide();');
-newStr = newStr.replace('c1G[5]=v8yy;', 'c1G[5]=v8yy;' + 'window.bonkHost.playerManagement.hide();');
+newStr = newStr.replace('w1G[5]=v8yy;', 'w1G[5]=v8yy;' + 'window.bonkHost.playerManagement.hide();window.bonkHost.scores=[];');
+newStr = newStr.replace('c1G[5]=v8yy;', 'c1G[5]=v8yy;' + 'window.bonkHost.playerManagement.hide();window.bonkHost.scores=[];');
+newStr = newStr.replace('O7G[4]=v8yy;', 'O7G[4]=v8yy;' + 'window.bonkHost.playerManagement.hide();window.bonkHost.scores=[];');
 
 //Add default click handler (mainly for closing the dropdown menu)
 newStr = newStr.replace('=e6h;', '=e6h;' + 'document.getElementById("hostPlayerMenu").onclick=e6h;');
@@ -91,3 +95,19 @@ newStr = newStr.replace('t9G[5]=v8yy;', 't9G[5]=v8yy;' + 'if(w3G[26].element!=nu
 
 //Update menu when joined
 newStr = newStr.replaceAll('=u6H[30];', '=u6H[30];if(!u6H[64]){let oldVisibility=window.bonkHost.menuFunctions.visible;window.bonkHost.menuFunctions.visible=true;window.bonkHost.menuFunctions.updatePlayers();window.bonkHost.menuFunctions.visible = oldVisibility;}');
+
+//Save latest state
+newStr = newStr.replace('var T7k=[arguments];', 'I8yy.bonkHost.state=arguments[0];var T7k=[arguments];');
+
+newStr = newStr.replace('W6H[2][', SET_STATE);
+
+//Get useful menu functions
+newStr = newStr.replace('w3G[3]=w3G[0][0];', 'w3G[3]=w3G[0][0];window.bonkHost.menuUsage=w3G[3];');
+
+//Get player lists from updatePlayers() and update player elements for radial menu
+newStr = newStr.replace('(1,h9G[2])(h9G[3]);}', '(1,h9G[2])(h9G[3]);}' + 'window.bonkHost.players=w3G[0][1];window.bonkHost.updatePlayers();');
+
+newStr = newStr.replace('m9G[1]=w3G[0][1][X9G[0][0]][m9G[2][115]];', 'm9G[1]=w3G[0][1][X9G[0][0]][m9G[2][115]];' + 'if(!window.bonkHost.menuFunctions.visible && I8yy.bonkHost.state.discs[X9G[0][0]] == undefined && I8yy.bonkHost.state.discDeaths.findIndex(i => {return i.i === X9G[0][0]})){m9G[1]=0;}');
+
+//Fix skin bug
+newStr = newStr.replace('u9k[2][u9k[5][457]][u9k[5][456]](i9k[42]);}', 'u9k[2][u9k[5][457]][u9k[5][456]](i9k[42]);}' + "window.bonkHost.redrawSkin(i9k[23]);");
