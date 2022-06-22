@@ -7,8 +7,8 @@
 // @run-at       document-start
 // @grant        none
 // @supportURL   https://discord.gg/Dj6usq7ww3
-// @updateURL    https://github.com/Salama//***SNAME***//releases/latest/download//***SNAME***/.js
-// @downloadURL  https://github.com/Salama//***SNAME***//releases/latest/download//***SNAME***/.js
+// @updateURL    https://github.com/Salama//***SNAME***//releases/latest/download//***SNAME***/.user.js
+// @downloadURL  https://github.com/Salama//***SNAME***//releases/latest/download//***SNAME***/.user.js
 // @namespace    https://greasyfork.org/users/824888
 // ==/UserScript==
 
