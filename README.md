@@ -11,6 +11,9 @@ A browser extension to improve hosting on bonk.io
 * `/freejoin` to let people in without restarting the game
 * Player management menu for host in game
 * Command and playername autocompletion by pressing `tab`
+* Team selection wheel
+* Mode button in map sleection
+* Ability to restart the game without moving players on maps with respawning enabled
 
 ## Installation instructions
 ### Firefox
