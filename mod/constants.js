@@ -6,8 +6,9 @@ window.bonkHost.playerNames = [];
 window.bonkHost.scores = [];
 window.bonkHost.bans = [];
 window.bonkHost.startGameFunction = () => {return;};
+window.bonkHost.inGame = false;
 
-window.bonkCommands = window.bonkCommands.concat(["/kick", "/mute", "/unmute", "/lock", "/unlock", "/balance", "/fav", "/unfav", "/curate", "/curateyes", "/curateno", "/hhelp", "/balanceall", "/start", "/freejoin"]);
+window.bonkCommands = window.bonkCommands.concat(["/kick", "/mute", "/unmute", "/lock", "/unlock", "/balance", "/fav", "/unfav", "/curate", "/curateyes", "/curateno", "/hhelp", "/balanceall", "/start", "/freejoin", "/host"]);
 
 let hostPlayerMenuCSS = document.createElement('style');
 hostPlayerMenuCSS.innerHTML = `
@@ -22,35 +23,50 @@ hostPlayerMenu.outerHTML = `
 `;
 
 let CUSTOM_COMMANDS = `
-if(I8H[5][0] == "/hhelp") {
-	u6H[29].showStatusMessage("/balance * -100 to 100 -- Balances everyone","#cc3333",false);
-	u6H[29].showStatusMessage("/balanceall -100 to 100 -- Balances everyone","#cc3333",false);
-	u6H[29].showStatusMessage("/start -- Starts the game","#cc3333",false);
-	u6H[29].showStatusMessage("/freejoin on/off -- Lets people join during the game","#cc3333",false);
+let salamaHostCmdArgs = I8H[5];
+if(salamaHostCmdArgs[0] == "/hhelp") {
+	window.bonkHost.menuFunctions.showStatusMessage("/balance * -100 to 100 -- Balances everyone","#cc3333",false);
+	window.bonkHost.menuFunctions.showStatusMessage("/balanceall -100 to 100 -- Balances everyone","#cc3333",false);
+	window.bonkHost.menuFunctions.showStatusMessage("/start -- Starts the game","#cc3333",false);
+	window.bonkHost.menuFunctions.showStatusMessage("/freejoin on/off -- Lets people join during the game","#cc3333",false);
+	window.bonkHost.menuFunctions.showStatusMessage('/host "user name" -- Givest host to the player',"#cc3333",false);
 }
-else if(I8H[5][0] == "/start" && !u6H[64]) {
+else if(salamaHostCmdArgs[0] == "/start" && !u6H[64]) {
     window.bonkHost.startGame();
 }
-else if(I8H[5][0] == "/freejoin" && !u6H[64]) {
-    if(["true", "on", "yes", "enable"].includes(I8H[5][1])) {
+else if(salamaHostCmdArgs[0] == "/freejoin" && !u6H[64]) {
+    if(["true", "on", "yes", "enable"].includes(salamaHostCmdArgs[1])) {
         window.bonkHost.freejoin = true;
 	    F5S("* Freejoin on","#cc3333",true);
     }
-    else if(["false", "off", "no", "disable"].includes(I8H[5][1])) {
+    else if(["false", "off", "no", "disable"].includes(salamaHostCmdArgs[1])) {
         window.bonkHost.freejoin = false;
 	    F5S("* Freejoin off","#cc3333",true);
     }
-    else if(I8H[5].length == 1) {
+    else if(salamaHostCmdArgs.length == 1) {
         window.bonkHost.freejoin = !window.bonkHost.freejoin;
 	    F5S("* Freejoin " + (window.bonkHost.freejoin ? "on" : "off"),"#cc3333",true);
     }
     document.getElementById('hostPlayerMenuFreejoin').checked = window.bonkHost.freejoin;
 }
+else if(salamaHostCmdArgs[0] == "/host" && !u6H[64]) {
+    if (window.bonkHost.menuUsage.getLSID() != window.bonkHost.menuUsage.hostID) {
+        window.bonkHost.menuFunctions.showStatusMessage("* Must be room host to use this command", "#cc3333", false);
+        return;
+    }
+    let id = window.bonkHost.players.findIndex(e => {return e && e.userName.toLowerCase() === salamaHostCmdArgs[1].toLowerCase()});
+    if(id !== -1) {
+        window.bonkHost.menuUsage.sendHostChange(id);
+    }
+    else {
+	    F5S("* Giving host failed, username " + salamaHostCmdArgs[1] + " not found in this room","#cc3333",true);
+    }
+}
 `;
 
 let BALANCE_ALL_MESSAGE = `
 if(I8H[67] == -2) {
-	u6H[29].showStatusMessage("* " + "Everyone" + " has had their buff/nerf set to " + I8H[32], "#cc3333", false);
+	window.bonkHost.menuFunctions.showStatusMessage("* " + "Everyone" + " has had their buff/nerf set to " + I8H[32], "#cc3333", false);
 }
 else if(I8H[32] == 0)
 `;
@@ -58,9 +74,9 @@ else if(I8H[32] == 0)
 let BALANCE_SELECTION = `
 
 u6H[36].bal[I8H[17]] = I8H[32];
-u6H[11].sendBalance(I8H[17], I8H[32]);
-if (u6H[29]) {
-	u6H[29].updatePlayers();
+window.bonkHost.menuUsage.sendBalance(I8H[17], I8H[32]);
+if (window.bonkHost.menuFunctions) {
+	window.bonkHost.menuFunctions.updatePlayers();
 }
 I8H[67]=-2;
 if (u6H[44][I8H[17]].userName.toLowerCase() == I8H[7].toLowerCase()) {
@@ -184,7 +200,9 @@ if(window.bonkHost.scores.length > 0 && document.getElementById('hostPlayerMenuK
 else` + " ";
 
 let SET_STATE = `
-document.getElementById("hostPlayerMenuKeepPositions").parentNode.parentNode.style.display = (u6H[36].map.s.re ? "" : "none");
+document.getElementById("hostPlayerMenuKeepPositions").parentNode.parentNode.style.filter = (u6H[36].map.s.re ? "" : "brightness(0.5)");
+document.getElementById("hostPlayerMenuKeepPositions").style.pointerEvents = (u6H[36].map.s.re ? "" : "none");
+document.getElementById("hostPlayerMenuKeepPositions").parentNode.parentNode.title = (u6H[36].map.s.re ? "" : "Enable respawns to use");
 if(I8yy.bonkHost.state && window.bonkHost.keepState && u6H[36].map.s.re) {
     for(let i = 0; i < I8yy.bonkHost.state.discs.length; i++) {
         if(I8yy.bonkHost.state.discs[i] != undefined) {
@@ -274,12 +292,14 @@ window.bonkHost.playerManagement.removePlayer = (playerEntry) => {
 
 window.bonkHost.playerManagement.show = () => {
     if(window.bonkHost.menuFunctions.visible) return;
+    window.bonkHost.inGame = true;
     if(parent.document.getElementById('adboxverticalleftCurse') != null)
         parent.document.getElementById('adboxverticalleftCurse').style.display = "none";
     document.getElementById('hostPlayerMenu').style.display = "unset";
 }
 
 window.bonkHost.playerManagement.hide = () => {
+    window.bonkHost.inGame = false;
     document.getElementById('hostPlayerMenu').style.display = "none";
     if(parent.document.getElementById('adboxverticalleftCurse') != null)
         parent.document.getElementById('adboxverticalleftCurse').style.removeProperty("display");
@@ -322,6 +342,7 @@ window.bonkHost.playerManagement.getPlayer = (playerEntry, exact = false) => {
 }
 
 window.bonkHost.playerManagement.movePlayer = (playerID, playerCount, team) => {
+    if(!window.bonkHost.players[playerID] || !window.bonkHost.inGame) return;
     window.bonkHost.menuFunctions.visible = true;
     if(team > 0)
         window.bonkHost.bonkHandlers.hostHandlePlayerJoined(playerID, playerCount, team);
@@ -438,7 +459,7 @@ document.getElementById('newbonklobby_chat_input').onkeydown = e => {
     const innerWheelRadius = (wheelSize/26.458)/2*8.5;
     window.bonkHost.updatePlayers = () => {
         if(window.bonkHost.menuUsage.getLSID() !== window.bonkHost.menuUsage.hostID) return;
-        [...document.getElementsByClassName("newbonklobby_playerentry")].filter(e => {return e.parentNode.id === "newbonklobby_playerbox_elementcontainer" || e.parentNode.id === "newbonklobby_specbox_elementcontainer" || e.parentNode.id === "hostPlayerMenuBox"}).forEach(e => {
+        [...document.getElementsByClassName("newbonklobby_playerentry")].filter(e => {return ["newbonklobby_playerbox_leftelementcontainer", "newbonklobby_playerbox_rightelementcontainer", "newbonklobby_playerbox_elementcontainer", "newbonklobby_specbox_elementcontainer", "hostPlayerMenuBox"].includes(e.parentNode.id)}).forEach(e => {
             e.addEventListener("mousedown", mouse => {
                 selectedPlayer = e;
                 start = [mouse.clientY, mouse.clientX];
