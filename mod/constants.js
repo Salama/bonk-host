@@ -4,6 +4,7 @@ window.bonkHost.freejoin = false;
 window.bonkHost.playerCount = 0;
 window.bonkHost.playerNames = [];
 window.bonkHost.scores = [];
+window.bonkHost.bans = [];
 window.bonkHost.startGameFunction = () => {return;};
 
 window.bonkCommands = window.bonkCommands.concat(["/kick", "/mute", "/unmute", "/lock", "/unlock", "/balance", "/fav", "/unfav", "/curate", "/curateyes", "/curateno", "/hhelp", "/balanceall", "/start", "/freejoin"]);

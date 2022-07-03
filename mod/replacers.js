@@ -111,3 +111,16 @@ newStr = newStr.replace('m9G[1]=w3G[0][1][X9G[0][0]][m9G[2][115]];', 'm9G[1]=w3G
 
 //Fix skin bug
 newStr = newStr.replace('u9k[2][u9k[5][457]][u9k[5][456]](i9k[42]);}', 'u9k[2][u9k[5][457]][u9k[5][456]](i9k[42]);}' + "window.bonkHost.redrawSkin(i9k[23]);");
+
+//Get banned
+let ban = newStr.match(/banshortid:...\[0\]\[0\]\}\);/)[0];
+let banId = ban.match(/...\[0\]\[0\]/)[0];
+newStr = newStr.replace(ban, ban + `if(!window.bonkHost.players[${banId}].guest&&!window.bonkHost.bans.includes(window.bonkHost.players[${banId}].userName)){window.bonkHost.bans.push(window.bonkHost.players[${banId}].userName)}`);
+
+//Reban
+let playerJoinedCustom = newStr.match(/\[\d\],ping:105\};/)[0];
+newStr = newStr.replace(playerJoinedCustom, playerJoinedCustom+`if(window.bonkHost.menuUsage.getLSID()===window.bonkHost.menuUsage.hostID&&!arguments[2]&&window.bonkHost.bans.includes(arguments[1])){window.bonkHost.menuUsage.banPlayer(arguments[0]);return;}`);
+
+//Joined room
+let connectionMatch = newStr.match(/reconnection:false\}\);/)[0];
+newStr = newStr.replace(connectionMatch, connectionMatch + `window.bonkHost.bans=[];`);
