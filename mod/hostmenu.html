@@ -31,8 +31,13 @@
 					</td>
 				</tr>
 				<tr style="background-color: rgba(58, 58, 58, 0.07);">
-					<td style="padding-left: 10px;" class="mapeditor_rightbox_table">
-						Keep positions
+					<td>
+						<div style="padding-left: 10px;" class="mapeditor_rightbox_table">
+							Keep positions
+						</div>
+						<div style="padding-left: 10px; font-size: 10px; display:none" class="mapeditor_rightbox_table" id="hostPlayerMenuRespawningRequiredWarning">
+							Respawning required
+						</div
 					</td>
 					<td>
 						<input type="checkbox" id="hostPlayerMenuKeepPositions">
@@ -91,3 +96,90 @@
 		fill: #fff;
 	"><tspan x="6" y="19.5">GREEN</tspan></text></svg>
 </div>
+<!--
+<div id="teamshufflebutton" class="brownButton brownButton_classic buttonShadow" style="
+    width: 16px;
+    height: 35px;
+    border-radius: 2px;
+    position: absolute;
+    top: calc(17% - 40px);
+    right: calc(33.5% - 8px);
+    font-family: monospace;
+	">
+	<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="height: 100%;transform:scaleX(-0.9);">
+		<path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.43.636-.98 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.624 9.624 0 0 0 7.556 8a9.624 9.624 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.595 10.595 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.624 9.624 0 0 0 6.444 8a9.624 9.624 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5z"></path>
+		<path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192zm0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192z"></path>
+	</svg>
+</div>
+<div id="teamshufflebox" class="newbonklobby_elementcontainer" style="
+    position: absolute;
+    top: calc(17% - 42px);
+    right: calc(33.5% - 10px);
+    width: auto;
+    height: auto;
+    bottom: unset;
+    outline: 3000px solid rgba(0,0,0,0.30);
+	visibility: hidden;
+">
+	<div class="newbonklobby_boxtop newbonklobby_boxtop_classic" style="
+	    height: 39px;
+	    line-height: 39px;
+	">
+		Shuffle Teams
+		<div onclick=window.bonkHost.shuffleTeams class="newbonklobby_votewindow_votebutton brownButton brownButton_classic buttonShadow" id="newbonklobby_votewindow_votebutton_up" style="
+    		margin: 0;
+    		height: 35px;
+    		width: 25px;
+    		position: absolute;
+    		left: calc(100% - 27px);
+    		top: 2px;
+		"></div>
+		<div onclick="()=>{document.getElementById('teamshufflebox').style.visibility='hidden';}" class="newbonklobby_votewindow_votebutton brownButton brownButton_classic buttonShadow" id="newbonklobby_votewindow_votebutton_down" style="
+    		margin: 0;
+    		height: 35px;
+    		width: 25px;
+    		position: absolute;
+    		top: 2px;
+    		left: calc(100% - 55px);
+		"></div>
+	</div>
+	<table id="mapeditor_rightbox_table_simple" class="mapeditor_rightbox_table">
+		<tbody>
+		<tr>
+			<td class="mapeditor_rightbox_table_leftcell">Players per team</td>
+			<td class="mapeditor_rightbox_table_rightcell">
+					<div class="mapeditor_field_button fieldShadow" style="width:auto;margin:0 3;" onclick="() => {
+						document.getElementById('teamshufflebox').value = 'AUTO';
+					}">AUTO</div>
+				<div class="mapeditor_field_button fieldShadow" style="margin:0 1;">-</div>
+				<input id="teamshuffleppt" class="mapeditor_field fieldShadow" value="1" autocomplete="off" style="width:44px;">
+					<div class="mapeditor_field_button fieldShadow" style="margin 0 1;" onclick="() => {
+						document.getElementById('teamshuffleppt').value = parseInt(document.getElementById('teamshuffleppt').value) + 1;
+					}">+</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="mapeditor_rightbox_table_leftcell">Teams</td>
+			<td class="mapeditor_rightbox_table_rightcell" style="
+				display: grid;
+				align-content: center;
+				justify-content: center;
+				align-items: center;
+				grid-template-columns: 20px 25px 20px 35px;
+			">
+				<input type="checkbox" id="team_shuffle_blue"><label>Blue</label>
+				<input type="checkbox" id="team_shuffle_green"><label>Green</label>
+				<input type="checkbox" id="team_shuffle_red"><label>Red</label>
+				<input type="checkbox" id="team_shuffle_yellow"><label>Yellow</label>
+			</td>
+		</tr>
+			<tr>
+				<td class="mapeditor_rightbox_table_leftcell">Autoshuffle</td>
+				<td class="mapeditor_rightbox_table_rightcell">
+					<input type="checkbox" id="mapeditor_rightbox_table_bullet">
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+-->

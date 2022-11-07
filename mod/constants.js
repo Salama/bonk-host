@@ -1,14 +1,13 @@
 window.bonkHost = {};
 window.bonkHost.playerManagement = {};
 window.bonkHost.freejoin = false;
-window.bonkHost.playerCount = 0;
-window.bonkHost.playerNames = [];
-window.bonkHost.scores = [];
 window.bonkHost.bans = [];
-window.bonkHost.startGameFunction = () => {return;};
 window.bonkHost.inGame = false;
+window.bonkHost.playerManagement.canBeVisible = false;
+window.bonkHost.bonkCallbacks = {};
+window.bonkHost.playerHistory = {};
 
-window.bonkCommands = window.bonkCommands.concat(["/kick", "/mute", "/unmute", "/lock", "/unlock", "/balance", "/fav", "/unfav", "/curate", "/curateyes", "/curateno", "/hhelp", "/balanceall", "/start", "/freejoin", "/host"]);
+window.bonkCommands = window.bonkCommands.concat(["/kick", "/mute", "/unmute", "/lock", "/unlock", "/balance", "/fav", "/unfav", "/curate", "/curateyes", "/curateno", "/hhelp", "/balanceall", "/start", "/freejoin", "/host", "/ban", "/bans", "/unban"]);
 
 let hostPlayerMenuCSS = document.createElement('style');
 hostPlayerMenuCSS.innerHTML = `
@@ -21,361 +20,721 @@ document.getElementById('pagecontainer').appendChild(hostPlayerMenu);
 hostPlayerMenu.outerHTML = `
 /***HOSTMENU_HTML***/
 `;
+document.getElementById("hostPlayerMenuBox").addEventListener("click", (e) => {
+	if(e.target === document.getElementById("hostPlayerMenuBox")) {
+		document.getElementById('newbonklobby').click();
+	}
+});
 
-let CUSTOM_COMMANDS = `
-let salamaHostCmdArgs = I8H[5];
-if(salamaHostCmdArgs[0] == "/hhelp") {
-	window.bonkHost.menuFunctions.showStatusMessage("/balance * -100 to 100 -- Balances everyone","#cc3333",false);
-	window.bonkHost.menuFunctions.showStatusMessage("/balanceall -100 to 100 -- Balances everyone","#cc3333",false);
-	window.bonkHost.menuFunctions.showStatusMessage("/start -- Starts the game","#cc3333",false);
-	window.bonkHost.menuFunctions.showStatusMessage("/freejoin on/off -- Lets people join during the game","#cc3333",false);
-	window.bonkHost.menuFunctions.showStatusMessage('/host "user name" -- Givest host to the player',"#cc3333",false);
-}
-else if(salamaHostCmdArgs[0] == "/start" && !u6H[64]) {
-    window.bonkHost.startGame();
-}
-else if(salamaHostCmdArgs[0] == "/freejoin" && !u6H[64]) {
-    if(["true", "on", "yes", "enable"].includes(salamaHostCmdArgs[1])) {
-        window.bonkHost.freejoin = true;
-	    F5S("* Freejoin on","#cc3333",true);
-    }
-    else if(["false", "off", "no", "disable"].includes(salamaHostCmdArgs[1])) {
-        window.bonkHost.freejoin = false;
-	    F5S("* Freejoin off","#cc3333",true);
-    }
-    else if(salamaHostCmdArgs.length == 1) {
-        window.bonkHost.freejoin = !window.bonkHost.freejoin;
-	    F5S("* Freejoin " + (window.bonkHost.freejoin ? "on" : "off"),"#cc3333",true);
-    }
-    document.getElementById('hostPlayerMenuFreejoin').checked = window.bonkHost.freejoin;
-}
-else if(salamaHostCmdArgs[0] == "/host" && !u6H[64]) {
-    if (window.bonkHost.menuUsage.getLSID() != window.bonkHost.menuUsage.hostID) {
-        window.bonkHost.menuFunctions.showStatusMessage("* Must be room host to use this command", "#cc3333", false);
-        return;
-    }
-    let id = window.bonkHost.players.findIndex(e => {return e && e.userName.toLowerCase() === salamaHostCmdArgs[1].toLowerCase()});
-    if(id !== -1) {
-        window.bonkHost.menuUsage.sendHostChange(id);
-    }
-    else {
-	    F5S("* Giving host failed, username " + salamaHostCmdArgs[1] + " not found in this room","#cc3333",true);
-    }
-}
-`;
+document.getElementById("hostPlayerMenuRestartButton").addEventListener("click", () => {
+	window.bonkHost.startGame();
+});
 
-let BALANCE_ALL_MESSAGE = `
-if(I8H[67] == -2) {
-	window.bonkHost.menuFunctions.showStatusMessage("* " + "Everyone" + " has had their buff/nerf set to " + I8H[32], "#cc3333", false);
-}
-else if(I8H[32] == 0)
-`;
+/*document.getElementById('newbonklobby').appendChild(document.getElementById('teamshufflebutton'));
+document.getElementById('newbonklobby').appendChild(document.getElementById('teamshufflebox'));
+document.getElementById('teamshufflebutton').addEventListener('click', () => {
+	document.getElementById('teamshufflebox').style.visibility = document.getElementById('teamshufflebox').style.visibility == "hidden" ? "visible" : "hidden";
+});
+*/
+document.getElementById("newbonklobby_specbutton").addEventListener("dblclick", () => {moveEveryone(0)});
+document.getElementById("newbonklobby_ffabutton").addEventListener("dblclick", () => {moveEveryone(1)});
+document.getElementById("newbonklobby_bluebutton").addEventListener("dblclick", () => {moveEveryone(3)});
+document.getElementById("newbonklobby_redbutton").addEventListener("dblclick", () => {moveEveryone(2)});
+document.getElementById("newbonklobby_greenbutton").addEventListener("dblclick", () => {moveEveryone(4)});
+document.getElementById("newbonklobby_yellowbutton").addEventListener("dblclick", () => {moveEveryone(5)});
 
-let BALANCE_SELECTION = `
+const moveEveryone = (team) => {
+	if(!isHost()) return;
+	for(let id of window.bonkHost.toolFunctions.networkEngine.getConnectedPlayers()) {
+		window.bonkHost.toolFunctions.networkEngine.changeOtherTeam(id, team);
+	}
+}
 
-u6H[36].bal[I8H[17]] = I8H[32];
-window.bonkHost.menuUsage.sendBalance(I8H[17], I8H[32]);
-if (window.bonkHost.menuFunctions) {
-	window.bonkHost.menuFunctions.updatePlayers();
+const BIGVAR = newStr.match(/[A-Za-z0-9$]+\[[0-9]{6}\]/)[0].split('[')[0];
+
+const isHost = () => {
+	return window.bonkHost.toolFunctions.networkEngine.getLSID() === window.bonkHost.toolFunctions.networkEngine.hostID && !window.bonkHost.toolFunctions.getGameSettings().q;
 }
-I8H[67]=-2;
-if (u6H[44][I8H[17]].userName.toLowerCase() == I8H[7].toLowerCase()) {
-    I8H[67] = I8H[17];
-    break;
+window.bonkHost.wrap = () => {
+	// Event for when game finishes loading. Using a setInterval isn't optimal and we might miss some, but it's good enough for now
+	const gameLoadedWaiter = setInterval(() => {
+		// I hope a better way of doing this exists
+		if(window.bonkHost.menuFunctions !== undefined && Object.keys(window.bonkHost.menuFunctions).length >= 27) {
+			clearInterval(gameLoadedWaiter);
+		}
+		else return;
+		// Wrap menuFunctions
+		for(const i of Object.keys(window.bonkHost.menuFunctions)) {
+			if(typeof window.bonkHost.menuFunctions[i] !== "function") continue;
+			const ogFunc = window.bonkHost.menuFunctions[i];
+			window.bonkHost.menuFunctions[i] = function() {
+				let response = ogFunc.apply(window.bonkHost.menuFunctions, arguments);
+				switch(i) {
+					case "show":
+						window.bonkHost.playerManagement.canBeVisible = false;
+						window.bonkHost.playerManagement.hide();
+						if(window[BIGVAR].bonkHost.state) {
+							if(Math.max(...window[BIGVAR].bonkHost.state.scores) >= window.bonkHost.toolFunctions.getGameSettings().wl) {
+								for(let i = 0; i < window[BIGVAR].bonkHost.state.scores.length; i++) {
+									if(window[BIGVAR].bonkHost.state.scores === null) continue;
+									window[BIGVAR].bonkHost.state.scores[i] = 0;
+								}
+							}
+						}
+						break;
+					case "hide":
+						window.bonkHost.menuFunctions.visible = true;
+						window.bonkHost.playerManagement.canBeVisible = true;
+						if(isHost()) {
+							window.bonkHost.playerManagement.show();
+						}
+						break;
+					case "handleHostChange":
+					case "handleHostLeft":
+						window.bonkHost.handleHostChange(arguments[1] === window.bonkHost.toolFunctions.networkEngine.getLSID());
+						break;
+					case "handlePlayerJoin":
+						window.bonkHost.handlePlayerJoin(arguments[1]);
+						break;
+					case "updatePlayers":
+						while(document.getElementById("hostPlayerMenuBox").firstChild) {
+							document.getElementById("hostPlayerMenuBox").removeChild(document.getElementById("hostPlayerMenuBox").firstChild);
+						}
+						[...document.getElementsByClassName("newbonklobby_playerentry")].sort((a, b) => {
+							return window.bonkHost.players.filter(p=>p).findIndex(p => a.childNodes[1].textContent === p.userName) - window.bonkHost.players.filter(p=>p).findIndex(p => b.childNodes[1].textContent == p.userName);
+						}).filter(p => {
+							// Idk if this is needed but it doesn't hurt to have it
+							return window.bonkHost.players.filter(pp=>pp).findIndex(pp => p.childNodes[1].textContent === pp.userName) !== -1;
+						}).forEach(p => {
+							if(p.classList.contains("bonkhost_playerentry")) return;
+							window.bonkHost.playerManagement.addPlayer(p);
+						})
+						window.bonkHost.updatePlayers();
+						break;
+				}
+				return response;
+			}
+		}
+		for(const i of Object.keys(window.bonkHost.toolFunctions.networkEngine)) {
+			if(typeof window.bonkHost.toolFunctions.networkEngine[i] !== "function") continue;
+			const ogFunc = window.bonkHost.toolFunctions.networkEngine[i];
+			window.bonkHost.toolFunctions.networkEngine[i] = function() {
+				let response = ogFunc.apply(window.bonkHost.toolFunctions.networkEngine, arguments);
+				switch(i) {
+					case "changeOtherTeam":
+						window.bonkHost.playerManagement.movePlayer(arguments[1], arguments[0]);
+						break;
+					case "changeOwnTeam":
+						window.bonkHost.playerManagement.movePlayer(arguments[0]);
+						break;
+				}
+				return response;
+			}
+		}
+		for(const i of Object.keys(window.bonkHost.stateFunctions)) {
+			if(typeof window.bonkHost.stateFunctions[i] !== "function") continue;
+			const ogFunc = window.bonkHost.stateFunctions[i];
+			window.bonkHost.stateFunctions[i] = function() {
+				let response = ogFunc.apply(window.bonkHost.stateFunctions, arguments);
+				switch(i) {
+					case "go":
+					case "goInProgress":
+						window.bonkHost.playerManagement.canBeVisible = true;
+						window.bonkHost.menuFunctions.visible = true;
+						window.bonkHost.menuFunctions.updatePlayers();
+						break;
+				}
+				return response;
+			}
+		}
+		// Wrap step function
+		const step = window.bonkHost.bigClass.prototype.step;
+		window.bonkHost.bigClass.prototype.step = function() {
+			window[BIGVAR].bonkHost.state = argsuments[0];
+			step.apply(this, arguments);
+		}
+	}, 50);
 }
-`;
+
+
+const chatHandler = e => {
+	if(e.keyCode === 13) {
+		if(e.target.value.length > 0) {
+			if(e.target.value[0] === "/") {
+				let command = e.target.value.split(" ")[0].substring(1);
+				let args = e.target.value.split(" ").slice(1);
+				newArgs = [];
+				for(let i = 0; i < args.length; i++) {
+					if(args[i][0] === '"' && args[i][args[i].length - 1] !== '"') {
+						let str = args[i];
+						for(let j = i + 1; j < args.length; j++) {
+							str += " " + args[j];
+							if(args[j][args[j].length - 1] === '"') {
+								i = j;
+								break;
+							}
+						}
+						newArgs.push(str.substring(1, str.length - 1));
+					}
+					else if(args[i][0] === '"' && args[i][args[i].length - 1] === '"') {
+						newArgs.push(args[i].substring(1, args[i].length - 1));
+					}
+					else {
+						newArgs.push(args[i]);
+					}
+				}
+				args = newArgs;
+				// Save without reference
+				let oldMsg = e.target.value + "";
+				e.target.value = "";
+				if(command == "hhelp") {
+					window.bonkHost.menuFunctions.showStatusMessage("/balance * -100 to 100 -- Balances everyone","#cc3333",false);
+					window.bonkHost.menuFunctions.showStatusMessage("/balanceall -100 to 100 -- Balances everyone","#cc3333",false);
+					window.bonkHost.menuFunctions.showStatusMessage("/start -- Starts the game","#cc3333",false);
+					window.bonkHost.menuFunctions.showStatusMessage("/freejoin on/off -- Lets people join during the game","#cc3333",false);
+					window.bonkHost.menuFunctions.showStatusMessage('/host "user name" -- Givest host to the player',"#cc3333",false);
+					window.bonkHost.menuFunctions.showStatusMessage('/ban "user name" -- Kicks the player and prevents them from joining with the same account',"#cc3333",false);
+					window.bonkHost.menuFunctions.showStatusMessage('/unban "user name" -- Unbans the player but doesn\'t remove kicked status',"#cc3333",false);
+					window.bonkHost.menuFunctions.showStatusMessage('/bans -- Lists banned players',"#cc3333",false);
+				}
+				else if(command == "start") {
+					if(!isHost()) {
+						window.bonkHost.menuFunctions.showStatusMessage("* Must be room host to use this command", "#cc3333", false);
+						return;
+					}
+					window.bonkHost.startGame();
+				}
+				else if(command == "freejoin") {
+					if(args.length == 0) {
+						window.bonkHost.freejoin = !window.bonkHost.freejoin;
+					}
+					else if(["true", "on", "yes", "enable"].includes(args[0])) {
+						window.bonkHost.freejoin = true;
+					}
+					else if(["false", "off", "no", "disable"].includes(args[0])) {
+						window.bonkHost.freejoin = false;
+					}
+					window.bonkHost.menuFunctions.showStatusMessage("* Freejoin " + (window.bonkHost.freejoin ? "on" : "off"), "#cc3333", false);
+				}
+				else if(command == "host") {
+					if(args.length === 0) {
+						window.bonkHost.menuFunctions.showStatusMessage(`* Usage: /${command} "user name"`, "#cc3333", false);
+						return;
+					}
+					if(!isHost()) {
+						window.bonkHost.menuFunctions.showStatusMessage("* Must be room host to use this command", "#cc3333", false);
+						return;
+					}
+					let id = window.bonkHost.players.findIndex(e => {return e && e.userName === args[0]});
+					if(id !== -1) {
+						window.bonkHost.toolFunctions.networkEngine.sendHostChange(id);
+					}
+					else {
+						window.bonkHost.menuFunctions.showStatusMessage("* Giving host failed, username " + args[0] + " not found in this room", "#cc3333", false);
+					}
+				}
+				else if(command == "ban") {
+					if(args.length === 0) {
+						window.bonkHost.menuFunctions.showStatusMessage(`* Usage: /${command} "user name"`, "#cc3333", false);
+						return;
+					}
+					window.bonkHost.ban(args[0]);
+				}
+				else if(command == "unban") {
+					if(args.length === 0) {
+						window.bonkHost.menuFunctions.showStatusMessage(`* Usage: /${command} "user name"`, "#cc3333", false);
+						return;
+					}
+					if(!window.bonkHost.bans.includes(args[0])) {
+						window.bonkHost.menuFunctions.showStatusMessage(`* Username ${args[0]} not found in ban list`, "#cc3333", false);
+						return;
+					}
+					window.bonkHost.menuFunctions.showStatusMessage(`* Removing ${args[0]} from ban list`, "#cc3333", false);
+					window.bonkHost.bans.splice(window.bonkHost.bans.indexOf(args[0]), 1);
+				}
+				else if(command == "bans") {
+					window.bonkHost.menuFunctions.showStatusMessage("* List of banned players:\n" + window.bonkHost.bans.join("\n"), "#cc3333", false);
+				}
+				else if((command == "balance" && args[0] === "*") || command == "balanceall") {
+					if(args.length === 0) {
+						window.bonkHost.menuFunctions.showStatusMessage(`* Usage: /${command} "user name"`, "#cc3333", false);
+						return;
+					}
+					if(!isHost()) {
+						window.bonkHost.menuFunctions.showStatusMessage("* Must be room host to use this command", "#cc3333", false);
+						return;
+					}
+					let amount = parseInt(args[args.length - 1]);
+					if(amount < -100 || amount > 100 || isNaN(amount)) {
+						window.bonkHost.menuFunctions.showStatusMessage("* Balance must be between -100 and 100", "#cc3333", false);
+						return;
+					}
+					for(let i = 0; i < window.bonkHost.players.length; i++) {
+						window.bonkHost.gameInfo[2].bal[i] = amount;
+						window.bonkHost.toolFunctions.networkEngine.sendBalance(e, amount);
+					};
+					if(amount != 0) {
+						window.bonkHost.menuFunctions.showStatusMessage("* Buff/nerf changed for all players", "#cc3333", false);
+					}
+					else {
+						window.bonkHost.menuFunctions.showStatusMessage("* Buff/nerf reset for all players", "#cc3333", false);
+					}
+					if (window.bonkHost.menuFunctions) {
+						window.bonkHost.menuFunctions.updateGameSettings();
+						window.bonkHost.menuFunctions.updatePlayers();
+					}
+				}
+				
+				else {
+					e.target.value = oldMsg;
+				}
+			}
+		}
+	}
+}
+
+document.getElementById("newbonklobby_chat_input").addEventListener("keydown", chatHandler, true);
+document.getElementById("ingamechatinputtext").addEventListener("keydown", chatHandler, true);
+
+chatObserver = new MutationObserver(e => {
+	for(let mutation of e) {
+		if(mutation.type == "childList") {
+			for(let node of mutation.addedNodes) {
+				if(node.textContent === "* Accepted commands are listed above ") {
+					let helpmsg = document.createElement("div");
+					mutation.target.insertBefore(helpmsg, node.previousSibling);
+					helpmsg.outerHTML = '<div><span class="newbonklobby_chat_status" style="color: rgb(204, 51, 51);">/hhelp - commands from host mod</span></div>';
+				}
+				else if(node.textContent[0] === "*" && node.textContent.endsWith((" has left the game "))) {
+					let userName = node.textContent.slice(2).slice(0, -19);
+					if(window.bonkHost.playerHistory[userName].guest) return;
+					let banButton = document.createElement("span");
+					banButton.className = "newbonklobby_mapsuggest_high newbonklobby_chat_link";
+					banButton.textContent = "[Ban]";
+					banButton.style = "color: rgb(204, 51, 51);";
+					banButton.onclick = () => {
+						if(banButton.textContent === "[Ban]") {
+							window.bonkHost.ban(userName);
+							banButton.textContent = "[Unban]";
+						}
+						else {
+							window.bonkHost.bans.splice(window.bonkHost.bans.indexOf(userName), 1);
+							window.bonkHost.menuFunctions.showStatusMessage(`* Removing ${userName} from ban list`, "#cc3333", false);
+							banButton.textContent = "[Ban]";
+						}
+					}
+					node.appendChild(banButton);
+				}
+			}
+		}
+	}
+});
+
+chatObserver.observe(document.getElementById("newbonklobby_chat_content"), {attributes: false, childList: true, subtree: false});
+
+const mapSuggestionModeRegex = newStr.match(/([A-Za-z0-9\$_]{3}\[[0-9]{1,4}\]\[[A-Za-z0-9\$_]{3}(\[[0-9]{1,4}\]){2}\]\([A-Za-z0-9\$_]{3}\[[0-9]{1,4}\]\);){7}if\([A-Za-z0-9\$_]{3}\[[0-9]{1,4}\]\[[A-Za-z0-9\$_]{3}(\[[0-9]{1,4}\]){2}\] > 250/)[0];
 
 let SUGGESTION_MODE_BUTTON = `
-let space = document.createElement("span");
-space.classList.add("newbonklobby_mapsuggest_high");
-space.appendChild(document.createTextNode(" "));
+let args = arguments;
+if(!!window.bonkHost.bonkModesObject[args[0].m.mo]) {
+	let space = document.createElement("span");
+	space.classList.add("newbonklobby_mapsuggest_high");
+	space.appendChild(document.createTextNode(" "));
 
-let smb = document.createElement("span");
-smb.classList.add("newbonklobby_mapsuggest_high");
-smb.classList.add("newbonklobby_chat_link");
-smb.style.color="#ff0000";
-v2k[79].setButtonSounds([smb]);
 
-smb.onclick = () => {
-	d9G[73].onclick();
-	window.bonkSetMode(w3G[2][d9G[73].suggestID].m.mo);
-};
+	let smb = document.createElement("span");
+	smb.classList.add("newbonklobby_mapsuggest_high");
+	smb.classList.add("newbonklobby_chat_link");
+	smb.style.color="#ff0000";
+	smb.onclick = e => {
+		smb.parentNode.getElementsByClassName("newbonklobby_mapsuggest_high newbonklobby_chat_link")[0].click();
+		window.bonkHost.bonkSetMode(args[0].m.mo);
+	};
+	${mapSuggestionModeRegex.split("]")[0] + "]"}.appendChild(space);
+	smb.appendChild(document.createTextNode("[" + window.bonkHost.bonkModesObject[args[0].m.mo].lobbyName + "]"));
+	${mapSuggestionModeRegex.split("]")[0] + "]"}.appendChild(smb);
+}
 `;
 
 let APPEND_SUGGESTION_MODE_BUTTON = `
-if(!!v2k[10].modes[w3G[2][d9G[73].suggestID].m.mo]) {
-	d9G[8].appendChild(space);
-	smb.appendChild(document.createTextNode("[" + v2k[10].modes[w3G[2][d9G[73].suggestID].m.mo].lobbyName + "]"));
-	d9G[8].appendChild(smb);
+	A7b[31].appendChild(space);
+	smb.appendChild(document.createTextNode("[" + r6t[47].modes[A7b[4][I$2[12].suggestID].m.mo].lobbyName + "]"));
+	A7b[31].appendChild(smb);
 }
 `;
 
-let modeStuff = newStr.match(
-    new RegExp(
-        "(var .{2,4}=\\[arguments\\];.{2,4}\\[\\d{1,2}\\]=.{2,5};).{1,300}\
-\\+\\+;\
-if.{5,60}=0;\\}\
-(.{5,50}=.{5,50})\
-\\[.{2,4}\\[\\d{1,4}\\]\\];\
-(.{5,200}=true.{5,200}\\(\\);)\
-\\}\\}"
-    )
-);
-// 1 is var m7p = [arguments]; m7p[4] = y3uu;
-// 2 is G7p[0][2]["mo"] = P1R[43]["lobbyModes"]
-// 3 is code that updates the mode
-let modeVar =
-    modeStuff[2].split("=")[0].match(/.{2,4}\[\d{1,2}\]\[\d{1,2}\]/g)[0] +
-    `["mo"]`;
-let modesObject =
-    modeStuff[2].split("=")[1].match(/.{2,4}\[\d{2,4}\]/g)[0] + `["modes"]`;
+let modeStuff = newStr.match(/[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\]=class [A-Za-z0-9\$_]{3}\{constructor.{1,400}=2;/)[0].split("=")[0];
 
-window.modeDropdownCreated = false;
-window.createModeDropdown = () => {
-    if (window.modeDropdownCreated) return;
-    window.modeDropdownCreated = true;
-    const dropdown = document.createElement("div");
-    dropdown.classList = "dropdown-container";
-    const mds = dropdown.style;
-    mds.color = "#ffffff";
-    mds.position = "absolute";
-    mds.right = "15px";
-    mds.bottom = "55px";
-    mds.width = "116px";
-    mds.height = "30px";
-    mds.display = "flex";
-    mds.textAlign = "center";
-    mds.flexDirection = "column-reverse";
+let modesObject =`${modeStuff}.modes`;
 
-    document.getElementById("newbonklobby_modebutton").remove();
-    let title = document.createElement("div");
-    title.classList = "dropdown-title dropdown_classic";
-    title.innerText = "MODE";
-    title.style.fontSize = "18px";
-    title.id = "newbonklobby_modebutton";
-    title.style.position = "unset";
-    dropdown.appendChild(title);
+window.bonkHost.modeDropdownCreated = false;
+window.bonkHost.createModeDropdown = () => {
+	if (window.bonkHost.modeDropdownCreated) return;
+	window.bonkHost.modeDropdownCreated = true;
+	const dropdown = document.createElement("div");
+	dropdown.classList = "dropdown-container";
+	const mds = dropdown.style;
+	mds.color = "#ffffff";
+	mds.position = "absolute";
+	mds.right = "15px";
+	mds.bottom = "55px";
+	mds.width = "116px";
+	mds.height = "30px";
+	mds.display = "flex";
+	mds.textAlign = "center";
+	mds.flexDirection = "column-reverse";
 
-    const options = [];
-    let dropdownOpen = false;
+	document.getElementById("newbonklobby_modebutton").remove();
+	let title = document.createElement("div");
+	title.classList = "dropdown-title dropdown_classic";
+	title.innerText = "MODE";
+	title.style.fontSize = "18px";
+	title.id = "newbonklobby_modebutton";
+	title.style.position = "unset";
+	dropdown.appendChild(title);
 
-    function toggleVisibility(e) {
-        dropdownOpen = !dropdownOpen;
-        for (const o of options) {
-            o.style.visibility = dropdownOpen ? "" : "hidden";
-        }
-        e.stopImmediatePropagation();
-    }
+	const options = [];
+	let dropdownOpen = false;
 
-    for (const mode of Object.keys(window.bonkModesObject)) {
-        const option = document.createElement("div");
-        option.classList = "dropdown-option dropdown_classic";
-        option.style.display = "block";
-        option.style.visibility = "hidden";
-        option.style.fontSize = "15px";
-        option.innerText = window.bonkModesObject[mode].lobbyName;
-        option.onclick = (e) => {
-            window.bonkSetMode(mode);
-            toggleVisibility(e);
-        };
-        options.push(option);
-        dropdown.appendChild(option);
-    }
+	function toggleVisibility(e) {
+		dropdownOpen = !dropdownOpen;
+		for (const o of options) {
+			o.style.visibility = dropdownOpen ? "" : "hidden";
+		}
+		e.stopImmediatePropagation();
+	}
 
-    title.addEventListener("click", toggleVisibility);
+	for (const mode of Object.keys(window.bonkHost.bonkModesObject)) {
+		const option = document.createElement("div");
+		option.classList = "dropdown-option dropdown_classic";
+		option.style.display = "block";
+		option.style.visibility = "hidden";
+		option.style.fontSize = "15px";
+		option.innerText = window.bonkHost.bonkModesObject[mode].lobbyName;
+		option.onclick = (e) => {
+			window.bonkHost.bonkSetMode(mode);
+			toggleVisibility(e);
+		};
+		options.push(option);
+		dropdown.appendChild(option);
+	}
 
-    document.getElementById("newbonklobby_settingsbox").appendChild(dropdown);
+	title.addEventListener("click", toggleVisibility);
+
+	document.getElementById("newbonklobby_settingsbox").appendChild(dropdown);
 };
 
-let PLAYER_CLICK_MENU = `
-if(playerEntry) {
-    playerEntry.parentNode.appendChild(m9G[6]);
-}
-else` + " ";
-
-let KEEP_SCORES = `
-if(window.bonkHost.scores.length > 0 && document.getElementById('hostPlayerMenuKeepScores').checked) {
-    k7k[1].scores = window.bonkHost.scores;
-}
-else` + " ";
+let stateCreationString = newStr.match(/[A-Z]\[...(\[[0-9]{1,4}\]){2}\]\(\[\{/)[0];
+let stateCreationStringIndex = stateCreationString.match(/[0-9]{1,4}/g);
+stateCreationStringIndex = stateCreationStringIndex[stateCreationStringIndex.length - 1];
+let stateCreation = newStr.match(`[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\]=[A-Za-z0-9\$_]{3}\\[[0-9]{1,4}\\]\\[[A-Za-z0-9\$_]{3}\\[[0-9]{1,4}\\]\\[${stateCreationStringIndex}\\]\\].+?(?=;);`)[0];
+stateCreationString = stateCreation.split(']')[0] + "]";
 
 let SET_STATE = `
-document.getElementById("hostPlayerMenuKeepPositions").parentNode.parentNode.style.filter = (u6H[36].map.s.re ? "" : "brightness(0.5)");
-document.getElementById("hostPlayerMenuKeepPositions").style.pointerEvents = (u6H[36].map.s.re ? "" : "none");
-document.getElementById("hostPlayerMenuKeepPositions").parentNode.parentNode.title = (u6H[36].map.s.re ? "" : "Enable respawns to use");
-if(I8yy.bonkHost.state && window.bonkHost.keepState && u6H[36].map.s.re) {
-    for(let i = 0; i < I8yy.bonkHost.state.discs.length; i++) {
-        if(I8yy.bonkHost.state.discs[i] != undefined) {
-            W6H[2].discs[i] = I8yy.bonkHost.state.discs[i];
-            if(u6H[36].mo=='sp') {
-                W6H[2].discs[i].a1a -= 2*30*3;
-            }
-        }
-    }
-    for(let i = 0; i < I8yy.bonkHost.state.discDeaths.length; i++) {
-        if(I8yy.bonkHost.state.discDeaths[i] != undefined) {
-            W6H[2].discDeaths[i] = I8yy.bonkHost.state.discDeaths[i];
-        }
-    }
-    W6H[2].physics=I8yy.bonkHost.state.physics;
-    W6H[2].seed=I8yy.bonkHost.state.seed;
-    W6H[2].rc=I8yy.bonkHost.state.rc;
-    W6H[2].ftu=60;
-    W6H[2].shk=I8yy.bonkHost.state.shk;
-    W6H[2].projectiles=I8yy.bonkHost.state.projectiles;
-    W6H[2].capZones=I8yy.bonkHost.state.capZones;
-    window.bonkHost.keepState=false;
-}W6H[2][
-`;
-
-let FREEJOIN = `
-if(window.bonkHost.freejoin||u6H[64]) {
-    let team = u6H[44].filter(e => {return e != null && u6H[44].indexOf(e) !== s6H[0][0] && e.team != 0}).map(e => {return e.team}).reduce((a, b) => {return a == b ? a : false});
-    team = team ? team : 0;
-    u6H[44][s6H[0][0]].team = team;
-    s6H[0][4] = team;
+if(${BIGVAR}.bonkHost.state && window.bonkHost.keepState && window.bonkHost.toolFunctions.getGameSettings().map.s.re) {
+	for(let i = 0; i < ${BIGVAR}.bonkHost.state.discs.length; i++) {
+		if(${BIGVAR}.bonkHost.state.discs[i] != undefined) {
+			${stateCreationString}.discs[i] = ${BIGVAR}.bonkHost.state.discs[i];
+			if(window.bonkHost.toolFunctions.getGameSettings().mo=='sp') {
+				${stateCreationString}.discs[i].a1a -= 2*30*3;
+			}
+		}
+	}
+	for(let i = 0; i < ${BIGVAR}.bonkHost.state.discDeaths.length; i++) {
+		if(${BIGVAR}.bonkHost.state.discDeaths[i] != undefined) {
+			${stateCreationString}.discDeaths[i] = ${BIGVAR}.bonkHost.state.discDeaths[i];
+		}
+	}
+	${stateCreationString}.physics=${BIGVAR}.bonkHost.state.physics;
+	${stateCreationString}.seed=${BIGVAR}.bonkHost.state.seed;
+	${stateCreationString}.rc=${BIGVAR}.bonkHost.state.rc;
+	${stateCreationString}.ftu=60;
+	${stateCreationString}.shk=${BIGVAR}.bonkHost.state.shk;
+	${stateCreationString}.projectiles=${BIGVAR}.bonkHost.state.projectiles;
+	${stateCreationString}.capZones=${BIGVAR}.bonkHost.state.capZones;
+	window.bonkHost.keepState=false;
+};
+if(${stateCreationString}.scores.length > 0 && document.getElementById('hostPlayerMenuKeepScores').checked) {
+	${stateCreationString}.scores = ${BIGVAR}.bonkHost.state.scores;
+}
 `;
 
 document.getElementById('hostPlayerMenuFreejoin').addEventListener('change', (e) => {
-    window.bonkHost.freejoin = e.target.checked;
+	window.bonkHost.freejoin = e.target.checked;
 });
 
 document.getElementById('hostPlayerMenuTeamlock').addEventListener('change', () => {
-    document.getElementById('newbonklobby_teamlockbutton').onclick();
+	document.getElementById('newbonklobby_teamlockbutton').onclick();
 });
 
-window.bonkHost.playerManagement.addPlayer = (playerEntry, info) => {
-    while(window.bonkHost.playerManagement.getPlayer(playerEntry)) {
-        window.bonkHost.playerManagement.removePlayer(playerEntry);
-    }
-    let newPlayerEntry = playerEntry.cloneNode(true);
-    newPlayerEntry.classList.remove('newbonklobby_playerentry_half');
-    newPlayerEntry.getElementsByClassName("newbonklobby_playerentry_ping")[0].remove();
-    newPlayerEntry.getElementsByClassName("newbonklobby_playerentry_host")[0].remove();
-    newPlayerEntry.onclick = playerEntry.onclick;
-    newPlayerEntry.onmouseenter = playerEntry.onmouseenter;
-    if(
-        info.team === 0 ||
-        (document.getElementById("newbonklobby_teams_middletext").textContent === "TEAMS ON" && info.team === 1) ||
-        (document.getElementById("newbonklobby_teams_middletext").textContent === "TEAMS OFF" && info.team > 1) ||
-        (
-            !window.bonkHost.freejoin &&
-            !window.bonkHost.menuFunctions.visible &&
-            I8yy.bonkHost.state.discs[window.bonkHost.players.findIndex(i => {return i && i.userName === newPlayerEntry.children[1].textContent})] == undefined &&
-            I8yy.bonkHost.state.discDeaths.findIndex(i => {return i.i === window.bonkHost.players.findIndex(i => {return i && i.userName === newPlayerEntry.children[1].textContent})})
-        )
-    ) {
-        newPlayerEntry.style.filter = "opacity(0.4)";
-    }
-    hostPlayerMenuBox.appendChild(newPlayerEntry);
-    if(!window.bonkHost.playerNames.includes(newPlayerEntry.children[1].textContent)) {
-        window.bonkHost.playerNames.push(newPlayerEntry.children[1].textContent);
-    }
+window.bonkHost.handlePlayerJoined = (playerID, playerName, guest) => {
+	if(!isHost()) return;
+	if(!guest && window.bonkHost.bans.includes(playerName)) {
+		window.bonkHost.toolFunctions.networkEngine.banPlayer(playerID);
+		return;
+	}
+	if(window.bonkHost.freejoin) {
+		let team = 1;
+		if(window.bonkHost.toolFunctions.getGameSettings().tea) {
+			let teams = window.bonkHost.players.slice(0, -1).filter(p=>p && p.team > 1).map(p=>p.team);
+			if(teams.every(t=>t==teams[0])) {
+				team = teams[0];
+			}
+			else return;
+		}
+		window.bonkHost.stateFunctions.hostHandlePlayerJoined(playerID, window.bonkHost.players.length, team);
+	}
 }
 
-window.bonkHost.redrawSkin = (skinElement) => {
-    if(!skinElement.parentNode.classList.contains("newbonklobby_playerentry")) return;
-    let playerElement = [...document.getElementById("hostPlayerMenuBox").children].filter(e => {return e.children[1] && e.children[1].textContent === skinElement.parentNode.getElementsByClassName("newbonklobby_playerentry_name")[0].textContent})[0];
-    if(!playerElement) return;
-    playerElement.removeChild(playerElement.getElementsByClassName("newbonklobby_playerentry_avatar")[0]);
-    playerElement.insertBefore(skinElement.cloneNode(true), playerElement.getElementsByClassName("newbonklobby_playerentry_name")[0]);
+window.bonkHost.ban = (playerName) => {
+	if(window.bonkHost.bans.includes(playerName)) {
+		window.bonkHost.menuFunctions.showStatusMessage("* " + playerName + " is already banned", "#cc3333", false);
+		return;
+	}
+	let id = window.bonkHost.players.findIndex(e => {return e && e.userName === playerName});
+	if(id !== -1 && isHost()) {
+		if(window.bonkHost.players[id].guest) {
+			window.bonkHost.menuFunctions.showStatusMessage("* Banning guests doesn't work, so they'll get kicked instead", "#cc3333", false);
+		}
+		else {
+			window.bonkHost.bans.push(playerName);
+		}
+		window.bonkHost.toolFunctions.networkEngine.banPlayer(id);
+	}
+	else if(id !== -1) {
+		window.bonkHost.menuFunctions.showStatusMessage(`* You're not room host, but ${playerName} will be added to ban list`, "#cc3333", false);
+		window.bonkHost.bans.push(playerName);
+	}
+	else {
+		window.bonkHost.menuFunctions.showStatusMessage(`* Username ${playerName} not found in this room, but they'll be added to ban list`, "#cc3333", false);
+		window.bonkHost.bans.push(playerName);
+	}
+}
+
+
+window.bonkHost.playerManagement.addPlayer = (playerEntry) => {
+	for(let player of window.bonkHost.players.filter(p=>p)) {
+		window.bonkHost.playerHistory[player.userName] = player;
+	}
+	while(window.bonkHost.playerManagement.getPlayer(playerEntry)) {
+		window.bonkHost.playerManagement.removePlayer(playerEntry);
+	}
+	let newPlayerEntry = playerEntry.cloneNode(true);
+	newPlayerEntry.classList.remove('newbonklobby_playerentry_half');
+	newPlayerEntry.getElementsByClassName("newbonklobby_playerentry_ping")[0].remove();
+	newPlayerEntry.getElementsByClassName("newbonklobby_playerentry_pingtext")[0].remove();
+	newPlayerEntry.getElementsByClassName("newbonklobby_playerentry_host")[0].remove();
+	if(isHost()) {
+		playerEntry.addEventListener('click', (e) => {
+			let menu = document.getElementsByClassName("newbonklobby_playerentry_menu")[0];
+			banButton = document.createElement("div");
+			banButton.classList = "newbonklobby_playerentry_menu_button brownButton brownButton_classic buttonShadow";
+			banButton.innerHTML = "BAN";
+			banButton.onclick = () => {
+				if(banButton.innerHTML == "BAN") {
+					banButton.innerHTML = "SURE?";
+					return;
+				}
+				window.bonkHost.ban(playerEntry.children[1].textContent);
+				menu.style.display = "none";
+			};
+			for(let child of menu.childNodes) {
+				if(child.textContent == "KICK") {
+					menu.insertBefore(banButton, child.nextSibling);
+					break;
+				}
+			}
+		});
+	}
+	newPlayerEntry.onclick = e => {
+		playerEntry.click();
+		let menu = document.getElementsByClassName("newbonklobby_playerentry_menu")[0];
+		document.getElementById("hostPlayerMenuBox").parentNode.appendChild(menu);
+		newPlayerEntry.playerElement=playerEntry;
+		menu.style.removeProperty("left");
+		menu.style.right=0;
+		menu.style.top=([...playerEntry.parentNode.children].indexOf(playerEntry))*43+"px";
+	}
+	newPlayerEntry.onmouseenter = playerEntry.onmouseenter;
+	info = window.bonkHost.players.filter(p=>p).find(p => p.userName === newPlayerEntry.childNodes[1].textContent);
+	if(
+		info.team === 0 ||
+		(document.getElementById("newbonklobby_teams_middletext").textContent === "TEAMS ON" && info.team === 1) ||
+		(document.getElementById("newbonklobby_teams_middletext").textContent === "TEAMS OFF" && info.team > 1) ||
+		(
+			!window.bonkHost.freejoin &&
+			window.bonkHost.playerManagement.canBeVisible &&
+			window.bonkHost.inGame &&
+			window[BIGVAR].bonkHost.state.discs[window.bonkHost.players.findIndex(i => {return i && i.userName === newPlayerEntry.children[1].textContent})] == undefined &&
+			window[BIGVAR].bonkHost.state.discDeaths.findIndex(i => {return i.i === window.bonkHost.players.findIndex(i => {return i && i.userName === newPlayerEntry.children[1].textContent})})
+		)
+	) {
+		newPlayerEntry.style.filter = "opacity(0.4)";
+	}
+	// Listen for skin render
+	let observer = new MutationObserver((mutations) => {
+		mutations.forEach((mutation) => {
+			// New child
+			mutation.addedNodes.forEach((node) => {
+				newPlayerEntry.firstChild.appendChild(node.cloneNode(true));
+				observer.disconnect();
+			});
+		});
+	});
+	observer.observe(playerEntry.children[0], { childList: true });
+	hostPlayerMenuBox.appendChild(newPlayerEntry);
 }
 
 window.bonkHost.playerManagement.removePlayer = (playerEntry) => {
-    if((foundPlayerEntry = window.bonkHost.playerManagement.getPlayer(playerEntry)) && foundPlayerEntry) {
-        hostPlayerMenuBox.removeChild(foundPlayerEntry);
-        if(window.bonkHost.playerNames.includes(foundPlayerEntry.children[1].textContent)) {
-            window.bonkHost.playerNames.splice(window.bonkHost.playerNames.indexOf(foundPlayerEntry.children[1].textContent), 1);
-        }
-    }
+	let foundPlayerEntry = window.bonkHost.playerManagement.getPlayer(playerEntry);
+	if(foundPlayerEntry) {
+		hostPlayerMenuBox.removeChild(foundPlayerEntry);
+	}
 }
 
 window.bonkHost.playerManagement.show = () => {
-    if(window.bonkHost.menuFunctions.visible) return;
-    window.bonkHost.inGame = true;
-    if(parent.document.getElementById('adboxverticalleftCurse') != null)
-        parent.document.getElementById('adboxverticalleftCurse').style.display = "none";
-    document.getElementById('hostPlayerMenu').style.display = "unset";
+	if(!window.bonkHost.playerManagement.canBeVisible) return;
+	if(parent.document.getElementById('adboxverticalleftCurse') != null)
+		parent.document.getElementById('adboxverticalleftCurse').style.display = "none";
+	document.getElementById("hostPlayerMenuKeepPositions").parentNode.parentNode.style.filter = (window.bonkHost.toolFunctions.getGameSettings().map.s.re ? "" : "brightness(0.5)");
+	document.getElementById("hostPlayerMenuKeepPositions").style.pointerEvents = (window.bonkHost.toolFunctions.getGameSettings().map.s.re ? "" : "none");
+	document.getElementById("hostPlayerMenuRespawningRequiredWarning").style.display = (window.bonkHost.toolFunctions.getGameSettings().map.s.re ? "none" : "");
+	document.getElementById('hostPlayerMenu').style.display = "unset";
+	window.bonkHost.menuFunctions.updatePlayers();
+	window.bonkHost.inGame = true;
 }
 
 window.bonkHost.playerManagement.hide = () => {
-    window.bonkHost.inGame = false;
-    document.getElementById('hostPlayerMenu').style.display = "none";
-    if(parent.document.getElementById('adboxverticalleftCurse') != null)
-        parent.document.getElementById('adboxverticalleftCurse').style.removeProperty("display");
+	window.bonkHost.inGame = false;
+	document.getElementById('hostPlayerMenu').style.display = "none";
+	if(parent.document.getElementById('adboxverticalleftCurse') != null)
+		parent.document.getElementById('adboxverticalleftCurse').style.removeProperty("display");
+}
+
+window.bonkHost.handleHostChange = (host) => {
+	if(host) {
+		window.bonkHost.playerManagement.show();
+	}
+	else {
+		window.bonkHost.playerManagement.hide();
+	}
 }
 
 window.bonkHost.playerManagement.collapse = () => {
-    if(document.getElementById('hostPlayerMenu').style.visibility != "hidden") {
-        document.getElementById('hostPlayerMenuControls').style.display = "none";
-        document.getElementById('hostPlayerMenuControls').visibility = "hidden";
-        document.getElementById('hostPlayerMenu').style.minWidth = 0;
-        document.getElementById('hostPlayerMenu').style.minHeight = 0;
-        document.getElementById('hostPlayerMenu').style.width = 0;
-        document.getElementById('hostPlayerMenu').style.height = 0;
-        document.getElementById('hostPlayerMenu').style.visibility = "hidden";
-        document.getElementById('hostPlayerMenuCollapse').textContent = "+";
-    }
-    else {
-        document.getElementById('hostPlayerMenu').style.visibility = "visible";
-        document.getElementById('hostPlayerMenu').style.removeProperty("min-width");
-        document.getElementById('hostPlayerMenu').style.removeProperty("min-height");
-        document.getElementById('hostPlayerMenu').style.removeProperty("width");
-        document.getElementById('hostPlayerMenu').style.removeProperty("height");
-        document.getElementById('hostPlayerMenu').style.visibility = "visible";
-        document.getElementById('hostPlayerMenuCollapse').textContent = "-";
-        setTimeout(() => {document.getElementById('hostPlayerMenuControls').style.removeProperty("display");}, 100);
-    }
+	if(document.getElementById('hostPlayerMenu').style.visibility != "hidden") {
+		document.getElementById('hostPlayerMenuControls').style.display = "none";
+		document.getElementById('hostPlayerMenuControls').visibility = "hidden";
+		document.getElementById('hostPlayerMenu').style.minWidth = 0;
+		document.getElementById('hostPlayerMenu').style.minHeight = 0;
+		document.getElementById('hostPlayerMenu').style.width = 0;
+		document.getElementById('hostPlayerMenu').style.height = 0;
+		document.getElementById('hostPlayerMenu').style.visibility = "hidden";
+		document.getElementById('hostPlayerMenuCollapse').textContent = "+";
+	}
+	else {
+		document.getElementById('hostPlayerMenu').style.visibility = "visible";
+		document.getElementById('hostPlayerMenu').style.removeProperty("min-width");
+		document.getElementById('hostPlayerMenu').style.removeProperty("min-height");
+		document.getElementById('hostPlayerMenu').style.removeProperty("width");
+		document.getElementById('hostPlayerMenu').style.removeProperty("height");
+		document.getElementById('hostPlayerMenu').style.visibility = "visible";
+		document.getElementById('hostPlayerMenuCollapse').textContent = "-";
+		setTimeout(() => {document.getElementById('hostPlayerMenuControls').style.removeProperty("display");}, 100);
+	}
 }
 
 window.bonkHost.playerManagement.getPlayer = (playerEntry, exact = false) => {
-    if (exact) {
-        let child = [...hostPlayerMenuBox.children].indexOf(playerEntry);
-        if(child) return hostPlayerMenuBox.children[child];
-    }
-    for(let child of hostPlayerMenuBox.children) {
-        if(child.children[1].textContent == playerEntry.children[1].textContent) {
-            return child;
-        }
-    }
-    return false;
+	if (exact) {
+		let child = [...hostPlayerMenuBox.children].indexOf(playerEntry);
+		if(child) return hostPlayerMenuBox.children[child];
+	}
+	for(let child of hostPlayerMenuBox.children) {
+		if(child.children[1].textContent == playerEntry.children[1].textContent) {
+			return child;
+		}
+	}
+	return false;
 }
 
-window.bonkHost.playerManagement.movePlayer = (playerID, playerCount, team) => {
-    if(!window.bonkHost.players[playerID] || !window.bonkHost.inGame) return;
-    window.bonkHost.menuFunctions.visible = true;
-    if(team > 0)
-        window.bonkHost.bonkHandlers.hostHandlePlayerJoined(playerID, playerCount, team);
-    else
-        window.bonkHost.bonkHandlers.hostHandlePlayerLeft(playerID);
-    window.bonkHost.menuFunctions.updatePlayers();
+window.bonkHost.playerManagement.movePlayer = (team, playerID = window.bonkHost.toolFunctions.networkEngine.getLSID()) => {
+	if(!window.bonkHost.players[playerID] || !window.bonkHost.inGame || !isHost() || window.bonkHost.toolFunctions.getGameSettings().q) return;
+	window.bonkHost.menuFunctions.visible = true;
+	if(team > 0)
+		window.bonkHost.stateFunctions.hostHandlePlayerJoined(playerID, window.bonkHost.players.length, team);
+	else
+		window.bonkHost.stateFunctions.hostHandlePlayerLeft(playerID);
+	window.bonkHost.menuFunctions.updatePlayers();
 }
 
 window.bonkHost.startGame = () => {
-    window.bonkHost.keepState = document.getElementById("hostPlayerMenuKeepPositions").checked;
-    window.bonkHost.startGameFunction();
+	window.bonkHost.keepState = document.getElementById("hostPlayerMenuKeepPositions").checked;
+	for(let callback of Object.keys(window.bonkHost.bonkCallbacks)) {
+    	window.bonkHost.bonkCallbacks[callback]("startGame");
+	}
+}
+
+// Fisher–Yates shuffle
+const shuffle = (array) => {
+	let currentIndex = array.length, randomIndex;
+
+	// While there remain elements to shuffle.
+	while (currentIndex != 0) {
+		// Pick a remaining element.
+		randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex--;
+
+		// And swap it with the current element.
+		[array[currentIndex], array[randomIndex]] = [
+		array[randomIndex], array[currentIndex]];
+	}
+	return array;
+}
+
+window.bonkHost.shufflePlayers = () => {
+	document.getElementById("teamshufflebox").style.visibility = "hidden";
+
+	//Players per team
+	let ppt = document.getElementById("teamshuffleppt").value;
+	let teams = 0;
+	for(let team of ["red", "blue", "yellow", "green"]) {
+		if(document.getElementById("team_shuffle_"+team).checked) {
+			teams++;
+		}
+	}
+	if(ppt === "AUTO") {
+		ppt = Math.ceil(window.bonkHost.players.length / teams);
+	}
+	let shuffledPlayers = shuffle(window.bonkHost.players);
+	for(let team of ["red", "blue", "yellow", "green"]) {
+		if(document.getElementById("team_shuffle_"+team).checked) {
+			for(let i = 0; i < ppt; i++) {
+			window.bonkHost.toolFunctions.networkEngine.changeOtherTeam(window.bonkHost.players.indexOf(shuffledPlayers.pop()), ["red", "blue", "yellow", "green"].indexOf(team)+2);
+			}
+		}
+	}
 }
 
 document.getElementById('maploadwindowmapscontainer').addEventListener('DOMNodeInserted', e => {
-    let mode = e.relatedNode.getElementsByClassName('maploadwindowtextmode')[0];
-    if(mode === undefined) mode = e.relatedNode.getElementsByClassName('maploadwindowtextmode_picks')[0];
-    if(mode.textContent !== "Any Mode") {
-        mode.classList.add('brownButton');
-        mode.classList.add('brownButton_classic');
-        mode.classList.add('buttonShadow');
-        mode.style.padding = "2px";
-        mode.style.width = "90px";
-    }
-    mode.addEventListener("click", e => {
-        if(!document.getElementById('newbonklobby_modebutton').classList.contains("brownButtonDisabled")) {
-            window.bonkSetMode(Object.entries(window.bonkModesObject).filter(e => {return e[1].lobbyName === mode.textContent})[0][0]);
-        }
-    })
+	let mode = e.relatedNode.getElementsByClassName('maploadwindowtextmode')[0];
+	if(mode === undefined) mode = e.relatedNode.getElementsByClassName('maploadwindowtextmode_picks')[0];
+	if(mode === undefined) return;
+	if(mode.textContent !== "Any Mode") {
+		mode.classList.add('brownButton');
+		mode.classList.add('brownButton_classic');
+		mode.classList.add('buttonShadow');
+		mode.style.padding = "2px";
+		mode.style.width = "90px";
+	}
+	mode.addEventListener("click", e => {
+		if(!document.getElementById('newbonklobby_modebutton').classList.contains("brownButtonDisabled")) {
+			window.bonkHost.bonkSetMode(Object.entries(window.bonkHost.bonkModesObject).filter(e => {return e[1].lobbyName === mode.textContent})[0][0]);
+		}
+	})
 });
 
 /*Autocomplete*/
 
-document.getElementById('newbonklobby_chat_input').onkeydown = e => {
+const autocomplete = e => {
 	if (e.keyCode === 9) {
 		e.preventDefault();
 		e.stopPropagation();
@@ -394,11 +753,23 @@ document.getElementById('newbonklobby_chat_input').onkeydown = e => {
 				}
 			}
 			if (foundAutocompletes.length === 0) {
-				for (let j = 0; j < window.bonkHost.playerNames.length; j++) {
-					for (let k = i; k >= 0; k--) {
-						if (window.bonkHost.playerNames[j].toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').match("^" + chatText.slice(k, i + 1).join(" ").toLowerCase().replace(/"/g, "").replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))) {
-							foundAutocompletes.push(window.bonkHost.playerNames[j]);
-							foundAutocompletesOffsets.push(k);
+				if(chatText[0] !== "/unban") {
+					for (let j = 0; j < window.bonkHost.players.filter(p=>p).length; j++) {
+						for (let k = i; k >= 0; k--) {
+							if (window.bonkHost.players.filter(p=>p).map(p=>p.userName)[j].toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').match("^" + chatText.slice(k, i + 1).join(" ").toLowerCase().replace(/"/g, "").replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))) {
+								foundAutocompletes.push(window.bonkHost.players.filter(p=>p).map(p=>p.userName)[j]);
+								foundAutocompletesOffsets.push(k);
+							}
+						}
+					}
+				}
+				else {
+					for (let j = 0; j < window.bonkHost.bans.length; j++) {
+						for (let k = i; k >= 0; k--) {
+							if (window.bonkHost.bans[j].toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').match("^" + chatText.slice(k, i + 1).join(" ").toLowerCase().replace(/"/g, "").replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))) {
+								foundAutocompletes.push(window.bonkHost.bans[j]);
+								foundAutocompletesOffsets.push(k);
+							}
 						}
 					}
 				}
@@ -434,7 +805,7 @@ document.getElementById('newbonklobby_chat_input').onkeydown = e => {
 						}
 					}
 				}
-                if(maxAutocomplete === "") return;
+				if(maxAutocomplete === "") return;
 				let oldlen = chatText[i].length;
 				let quotes = (chatText[0][0] === "/" && foundAutocompletes.some(r => r.includes(" ")));
 				if (quotes) {
@@ -449,110 +820,110 @@ document.getElementById('newbonklobby_chat_input').onkeydown = e => {
 			}
 		}
 	}
-}
+};
+document.getElementById("newbonklobby_chat_input").addEventListener("keydown", autocomplete, true);
+document.getElementById("ingamechatinputtext").addEventListener("keydown", autocomplete, true);
 
 (() => {
-    let selectedPlayer = null;
-    let start = [], end = [];
-    const wheelSize = 150;
-    let oldAngle = null;
-    const innerWheelRadius = (wheelSize/26.458)/2*8.5;
-    window.bonkHost.updatePlayers = () => {
-        if(window.bonkHost.menuUsage.getLSID() !== window.bonkHost.menuUsage.hostID) return;
-        [...document.getElementsByClassName("newbonklobby_playerentry")].filter(e => {return ["newbonklobby_playerbox_leftelementcontainer", "newbonklobby_playerbox_rightelementcontainer", "newbonklobby_playerbox_elementcontainer", "newbonklobby_specbox_elementcontainer", "hostPlayerMenuBox"].includes(e.parentNode.id)}).forEach(e => {
-            e.addEventListener("mousedown", mouse => {
-                selectedPlayer = e;
-                start = [mouse.clientY, mouse.clientX];
-            });
-        });
-    }
-    document.addEventListener("mousemove", mouse => {
-        if(selectedPlayer) {
-            document.body.style.pointerEvents = "none";
-            let wheelType = (document.getElementById("newbonklobby_teams_middletext").textContent === "TEAMS OFF") ? "selectionWheel" : "selectionWheelTeams";
-            document.getElementById(wheelType).style.display = "";
-            document.getElementById(wheelType).style.top = start[0]-document.getElementById(wheelType).getBoundingClientRect().height/2+"px";
-            document.getElementById(wheelType).style.left = start[1]-document.getElementById(wheelType).getBoundingClientRect().width/2+"px";
-            end = [mouse.clientY, mouse.clientX];
-            if(Math.sqrt((end[0]-start[0])**2 + (end[1]-start[1])**2) >= innerWheelRadius) {
-                if(document.getElementById("newbonklobby_teams_middletext").textContent === "TEAMS OFF") {
-                    let angle = end[1] < start[1];
-                    if(angle) {
-                        document.getElementById("selectionWheel").children[0].children[0].children[0].style.opacity = 1;
-                        document.getElementById("selectionWheel").children[0].children[1].children[0].style.opacity = 0.5;
-                    }
-                    else {
-                        document.getElementById("selectionWheel").children[0].children[0].children[0].style.opacity = 0.5;
-                        document.getElementById("selectionWheel").children[0].children[1].children[0].style.opacity = 1;
-                    }
-                    selectedPlayer.onmouseenter(angle);
-                    oldAngle = angle;
-                }
-                else {
-                    let angle = Math.atan((end[0]-start[0])/(end[1]-start[1]))/Math.PI*180+360/5/2;
-                    if(end[1] < start[1]) {
-                        angle += 180;
-                    }
-                    else if(end[0] < start[0]) {
-                        angle += 360;
-                    }
-                    angle = Math.floor((angle%360)/(360/5));
-                    if(oldAngle !== angle) {
-                        for(let child of [...document.getElementById("selectionWheelTeams").children[0].children[0].children]) {
-                            child.style.opacity = 0.5;
-                        }
-                    }
-                    document.getElementById("selectionWheelTeams").children[0].children[0].children[angle].style.opacity = 1;
-                    selectedPlayer.onmouseenter(angle);
-                    oldAngle = angle;
-                }
-            }
-            else {
-                if(oldAngle !== null) {
-                    for(let child of [...document.getElementById("selectionWheelTeams").children[0].children[0].children]) {
-                        child.style.opacity = 0.5;
-                    }
-                    for(let child of [...document.getElementById("selectionWheel").children[0].children]) {
-                        child.children[0].style.opacity = 0.5;
-                    }
-                }
-                selectedPlayer.onmouseenter(null);
-                oldAngle = null;
-            }
-        }
-    });
-    const changeTeam = mouse => {
-        document.getElementById("selectionWheel").style.display = "none";
-        document.getElementById("selectionWheelTeams").style.display = "none";
-        if(!selectedPlayer) return;
-        document.body.style.removeProperty("pointer-events");
-        end = [mouse.clientY, mouse.clientX];
-        if(Math.sqrt((end[0]-start[0])**2 + (end[1]-start[1])**2) >= innerWheelRadius) {
-            if(document.getElementById("newbonklobby_teams_middletext").textContent === "TEAMS OFF") {
-            for(let child of [...document.getElementById("selectionWheel").children[0].children]) {
-                child.children[0].style.opacity = 0.5;
-            }
-            window.bonkHost.menuUsage.changeOtherTeam(window.bonkHost.players.findIndex(i => {return i && i.userName === selectedPlayer.children[1].textContent}), end[1]<start[1] ? 1 : 0);
-            }
-            else {
-                let angle = Math.atan((end[0]-start[0])/(end[1]-start[1]))/Math.PI*180+360/5/2;
-                if(end[1] < start[1]) {
-                    angle += 180;
-                }
-                else if(end[0] < start[0]) {
-                    angle += 360;
-                }
-                angle = Math.floor((angle%360)/(360/5));
-                window.bonkHost.menuUsage.changeOtherTeam(window.bonkHost.players.findIndex(i => {return i && i.userName === selectedPlayer.children[1].textContent}), [0, 5, 4, 3, 2][angle]);
-            }
-        }
-        else {
-            selectedPlayer.click();
-        }
-        selectedPlayer = null;
-    }
-    document.addEventListener("mouseup", changeTeam);
-    document.addEventListener("mouseenter", mouse => {selectedPlayer = (mouse.buttons !== 0 ? selectedPlayer : null); if(!selectedPlayer)changeTeam(mouse)});
+	let selectedPlayer = null;
+	let start = [], end = [];
+	const wheelSize = 150;
+	let oldAngle = null;
+	const innerWheelRadius = (wheelSize/26.458)/2*8.5;
+	window.bonkHost.updatePlayers = () => {
+		if(!isHost()) return;
+		[...document.getElementsByClassName("newbonklobby_playerentry")].filter(e => {return ["newbonklobby_playerbox_leftelementcontainer", "newbonklobby_playerbox_rightelementcontainer", "newbonklobby_playerbox_elementcontainer", "newbonklobby_specbox_elementcontainer", "hostPlayerMenuBox"].includes(e.parentNode.id)}).forEach(e => {
+			e.addEventListener("mousedown", mouse => {
+				selectedPlayer = e;
+				start = [mouse.clientY, mouse.clientX];
+			});
+		});
+	}
+	document.addEventListener("mousemove", mouse => {
+		if(selectedPlayer) {
+			document.body.style.pointerEvents = "none";
+			let wheelType = (document.getElementById("newbonklobby_teams_middletext").textContent === "TEAMS OFF") ? "selectionWheel" : "selectionWheelTeams";
+			document.getElementById(wheelType).style.display = "";
+			document.getElementById(wheelType).style.top = start[0]-document.getElementById(wheelType).getBoundingClientRect().height/2+"px";
+			document.getElementById(wheelType).style.left = start[1]-document.getElementById(wheelType).getBoundingClientRect().width/2+"px";
+			end = [mouse.clientY, mouse.clientX];
+			if(Math.sqrt((end[0]-start[0])**2 + (end[1]-start[1])**2) >= innerWheelRadius) {
+				if(document.getElementById("newbonklobby_teams_middletext").textContent === "TEAMS OFF") {
+					let angle = end[1] < start[1];
+					if(angle) {
+						document.getElementById("selectionWheel").children[0].children[0].children[0].style.opacity = 1;
+						document.getElementById("selectionWheel").children[0].children[1].children[0].style.opacity = 0.5;
+					}
+					else {
+						document.getElementById("selectionWheel").children[0].children[0].children[0].style.opacity = 0.5;
+						document.getElementById("selectionWheel").children[0].children[1].children[0].style.opacity = 1;
+					}
+					selectedPlayer.onmouseenter(angle);
+					oldAngle = angle;
+				}
+				else {
+					let angle = Math.atan((end[0]-start[0])/(end[1]-start[1]))/Math.PI*180+360/5/2;
+					if(end[1] < start[1]) {
+						angle += 180;
+					}
+					else if(end[0] < start[0]) {
+						angle += 360;
+					}
+					angle = Math.floor((angle%360)/(360/5));
+					if(oldAngle !== angle) {
+						for(let child of [...document.getElementById("selectionWheelTeams").children[0].children[0].children]) {
+							child.style.opacity = 0.5;
+						}
+					}
+					document.getElementById("selectionWheelTeams").children[0].children[0].children[angle].style.opacity = 1;
+					selectedPlayer.onmouseenter(angle);
+					oldAngle = angle;
+				}
+			}
+			else {
+				if(oldAngle !== null) {
+					for(let child of [...document.getElementById("selectionWheelTeams").children[0].children[0].children]) {
+						child.style.opacity = 0.5;
+					}
+					for(let child of [...document.getElementById("selectionWheel").children[0].children]) {
+						child.children[0].style.opacity = 0.5;
+					}
+				}
+				selectedPlayer.onmouseenter(null);
+				oldAngle = null;
+			}
+		}
+	});
+	const changeTeam = mouse => {
+		document.getElementById("selectionWheel").style.display = "none";
+		document.getElementById("selectionWheelTeams").style.display = "none";
+		if(!selectedPlayer) return;
+		document.body.style.removeProperty("pointer-events");
+		end = [mouse.clientY, mouse.clientX];
+		if(Math.sqrt((end[0]-start[0])**2 + (end[1]-start[1])**2) >= innerWheelRadius) {
+			if(document.getElementById("newbonklobby_teams_middletext").textContent === "TEAMS OFF") {
+			for(let child of [...document.getElementById("selectionWheel").children[0].children]) {
+				child.children[0].style.opacity = 0.5;
+			}
+			window.bonkHost.toolFunctions.networkEngine.changeOtherTeam(window.bonkHost.players.findIndex(i => {return i && i.userName === selectedPlayer.children[1].textContent}), end[1]<start[1] ? 1 : 0);
+			}
+			else {
+				let angle = Math.atan((end[0]-start[0])/(end[1]-start[1]))/Math.PI*180+360/5/2;
+				if(end[1] < start[1]) {
+					angle += 180;
+				}
+				else if(end[0] < start[0]) {
+					angle += 360;
+				}
+				angle = Math.floor((angle%360)/(360/5));
+				window.bonkHost.toolFunctions.networkEngine.changeOtherTeam(window.bonkHost.players.findIndex(i => {return i && i.userName === selectedPlayer.children[1].textContent}), [0, 5, 4, 3, 2][angle]);
+			}
+		}
+		else {
+			selectedPlayer.click();
+		}
+		selectedPlayer = null;
+	}
+	document.addEventListener("mouseup", changeTeam);
+	document.addEventListener("mouseenter", mouse => {selectedPlayer = (mouse.buttons !== 0 ? selectedPlayer : null); if(!selectedPlayer)changeTeam(mouse)});
 })();
-
-document.getElementById('ingamechatinputtext').onkeydown = document.getElementById('newbonklobby_chat_input').onkeydown;
