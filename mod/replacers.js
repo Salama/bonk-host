@@ -18,7 +18,7 @@ let lastTarget = newStr.match(/editorCanTarget:(true|false)\};/g)
 lastTarget = lastTarget[lastTarget.length - 1];
 newStr = newStr.split(lastTarget);
 
-newStr[newStr.length - 1] = `window.bonkHost.bonkModesObject=${modesObject};window.bonkHost.bonkSetMode=m=>{if(m==="f"){window.bonkHost.gameInfo[2].tea=true;}window.bonkHost.gameInfo[2].ga=(m==="f" ? "f" : "b");window.bonkHost.gameInfo[2].mo=m;window.bonkHost.menuFunctions.updateGameSettings();window.bonkHost.menuFunctions.updatePlayers();};window.bonkHost.createModeDropdown();` + newStr[newStr.length - 1];
+newStr[newStr.length - 1] = `window.bonkHost.bonkModesObject=${modesObject};window.bonkHost.bonkSetMode=m=>{if(m==="f"){window.bonkHost.gameInfo[2].tea=true;}window.bonkHost.gameInfo[2].ga=(m==="f" ? "f" : "b");window.bonkHost.gameInfo[2].mo=m;window.bonkHost.menuFunctions.updateGameSettings();window.bonkHost.menuFunctions.updatePlayers();window.bonkHost.toolFunctions.networkEngine.sendGAMO(m==="f" ? "f" : "b", m);};window.bonkHost.createModeDropdown();` + newStr[newStr.length - 1];
 
 newStr = newStr.join(lastTarget);
 
