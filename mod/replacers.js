@@ -12,6 +12,9 @@ const patch = (a, b) => {
 //Remove round limit
 document.getElementById('newbonklobby_roundsinput').removeAttribute("maxlength");
 patch(/[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\]\[[0-9]{1,3}\]\[[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\]\[[0-9]{1,3}\]\]=Math\[[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\]\[[0-9]{1,3}\]\]\(Math\[[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\]\[[0-9]{1,3}\]\]\(1,[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\]\[[0-9]{1,3}\]\[[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\]\[[0-9]{1,3}\]\]\),9\);/, '');
+const roundVal = newStr.match(/[A-Za-z0-9\$_]{3}\[[0-9]{1,4}\]=parseInt\([A-Za-z0-9\$_]{3}(\[0\]){2}\[[A-Za-z0-9\$_]{3}(\[[0-9]{1,4}\]){2}\]\)\;/)[0];
+const roundValVar = roundVal.split('=')[0];
+patch(roundVal, `${roundValVar}=parseInt(document.getElementById('newbonklobby_roundsinput').value);if(isNaN(${roundValVar}) || ${roundValVar} <= 0){return;}`);
 
 //Mode selection menu. Custom patch
 let lastTarget = newStr.match(/editorCanTarget:(true|false)\};/g)

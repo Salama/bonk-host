@@ -43,6 +43,18 @@ document.getElementById("newbonklobby_redbutton").addEventListener("dblclick", (
 document.getElementById("newbonklobby_greenbutton").addEventListener("dblclick", () => {moveEveryone(4)});
 document.getElementById("newbonklobby_yellowbutton").addEventListener("dblclick", () => {moveEveryone(5)});
 
+document.getElementById("newbonklobby_roundsinput").style.height = "50px";
+document.getElementById("newbonklobby_roundsinput").style.textAlign = "center";
+
+document.getElementById("newbonklobby_roundsinput").addEventListener("focus", e => {
+	e.target.value = "";
+});
+document.getElementById("newbonklobby_roundsinput").addEventListener("blur", e => {
+	if(e.target.value == "") {
+		e.target.value = window.bonkHost.toolFunctions.getGameSettings().wl;
+	}
+});
+
 const moveEveryone = (team) => {
 	if(!isHost()) return;
 	for(let id of window.bonkHost.toolFunctions.networkEngine.getConnectedPlayers()) {
@@ -188,18 +200,18 @@ const chatHandler = e => {
 				let oldMsg = e.target.value + "";
 				e.target.value = "";
 				if(command == "hhelp") {
-					window.bonkHost.menuFunctions.showStatusMessage("/balance * -100 to 100 -- Balances everyone","#cc3333",false);
-					window.bonkHost.menuFunctions.showStatusMessage("/balanceall -100 to 100 -- Balances everyone","#cc3333",false);
-					window.bonkHost.menuFunctions.showStatusMessage("/start -- Starts the game","#cc3333",false);
-					window.bonkHost.menuFunctions.showStatusMessage("/freejoin on/off -- Lets people join during the game","#cc3333",false);
-					window.bonkHost.menuFunctions.showStatusMessage('/host "user name" -- Givest host to the player',"#cc3333",false);
-					window.bonkHost.menuFunctions.showStatusMessage('/ban "user name" -- Kicks the player and prevents them from joining with the same account',"#cc3333",false);
-					window.bonkHost.menuFunctions.showStatusMessage('/unban "user name" -- Unbans the player but doesn\'t remove kicked status',"#cc3333",false);
-					window.bonkHost.menuFunctions.showStatusMessage('/bans -- Lists banned players',"#cc3333",false);
+					window.bonkHost.menuFunctions.showStatusMessage("/balance * -100 to 100 -- Balances everyone","#b53030",false);
+					window.bonkHost.menuFunctions.showStatusMessage("/balanceall -100 to 100 -- Balances everyone","#b53030",false);
+					window.bonkHost.menuFunctions.showStatusMessage("/start -- Starts the game","#b53030",false);
+					window.bonkHost.menuFunctions.showStatusMessage("/freejoin on/off -- Lets people join during the game","#b53030",false);
+					window.bonkHost.menuFunctions.showStatusMessage('/host "user name" -- Givest host to the player',"#b53030",false);
+					window.bonkHost.menuFunctions.showStatusMessage('/ban "user name" -- Kicks the player and prevents them from joining with the same account',"#b53030",false);
+					window.bonkHost.menuFunctions.showStatusMessage('/unban "user name" -- Unbans the player but doesn\'t remove kicked status',"#b53030",false);
+					window.bonkHost.menuFunctions.showStatusMessage('/bans -- Lists banned players',"#b53030",false);
 				}
 				else if(command == "start") {
 					if(!isHost()) {
-						window.bonkHost.menuFunctions.showStatusMessage("* Must be room host to use this command", "#cc3333", false);
+						window.bonkHost.menuFunctions.showStatusMessage("* Must be room host to use this command", "#b53030", false);
 						return;
 					}
 					window.bonkHost.startGame();
@@ -214,15 +226,15 @@ const chatHandler = e => {
 					else if(["false", "off", "no", "disable"].includes(args[0])) {
 						window.bonkHost.freejoin = false;
 					}
-					window.bonkHost.menuFunctions.showStatusMessage("* Freejoin " + (window.bonkHost.freejoin ? "on" : "off"), "#cc3333", false);
+					window.bonkHost.menuFunctions.showStatusMessage("* Freejoin " + (window.bonkHost.freejoin ? "on" : "off"), "#b53030", false);
 				}
 				else if(command == "host") {
 					if(args.length === 0) {
-						window.bonkHost.menuFunctions.showStatusMessage(`* Usage: /${command} "user name"`, "#cc3333", false);
+						window.bonkHost.menuFunctions.showStatusMessage(`* Usage: /${command} "user name"`, "#b53030", false);
 						return;
 					}
 					if(!isHost()) {
-						window.bonkHost.menuFunctions.showStatusMessage("* Must be room host to use this command", "#cc3333", false);
+						window.bonkHost.menuFunctions.showStatusMessage("* Must be room host to use this command", "#b53030", false);
 						return;
 					}
 					let id = window.bonkHost.players.findIndex(e => {return e && e.userName === args[0]});
@@ -230,43 +242,43 @@ const chatHandler = e => {
 						window.bonkHost.toolFunctions.networkEngine.sendHostChange(id);
 					}
 					else {
-						window.bonkHost.menuFunctions.showStatusMessage("* Giving host failed, username " + args[0] + " not found in this room", "#cc3333", false);
+						window.bonkHost.menuFunctions.showStatusMessage("* Giving host failed, username " + args[0] + " not found in this room", "#b53030", false);
 					}
 				}
 				else if(command == "ban") {
 					if(args.length === 0) {
-						window.bonkHost.menuFunctions.showStatusMessage(`* Usage: /${command} "user name"`, "#cc3333", false);
+						window.bonkHost.menuFunctions.showStatusMessage(`* Usage: /${command} "user name"`, "#b53030", false);
 						return;
 					}
 					window.bonkHost.ban(args[0]);
 				}
 				else if(command == "unban") {
 					if(args.length === 0) {
-						window.bonkHost.menuFunctions.showStatusMessage(`* Usage: /${command} "user name"`, "#cc3333", false);
+						window.bonkHost.menuFunctions.showStatusMessage(`* Usage: /${command} "user name"`, "#b53030", false);
 						return;
 					}
 					if(!window.bonkHost.bans.includes(args[0])) {
-						window.bonkHost.menuFunctions.showStatusMessage(`* Username ${args[0]} not found in ban list`, "#cc3333", false);
+						window.bonkHost.menuFunctions.showStatusMessage(`* Username ${args[0]} not found in ban list`, "#b53030", false);
 						return;
 					}
-					window.bonkHost.menuFunctions.showStatusMessage(`* Removing ${args[0]} from ban list`, "#cc3333", false);
+					window.bonkHost.menuFunctions.showStatusMessage(`* Removing ${args[0]} from ban list`, "#b53030", false);
 					window.bonkHost.bans.splice(window.bonkHost.bans.indexOf(args[0]), 1);
 				}
 				else if(command == "bans") {
-					window.bonkHost.menuFunctions.showStatusMessage("* List of banned players:\n" + window.bonkHost.bans.join("\n"), "#cc3333", false);
+					window.bonkHost.menuFunctions.showStatusMessage("* List of banned players:\n" + window.bonkHost.bans.join("\n"), "#b53030", false);
 				}
 				else if((command == "balance" && args[0] === "*") || command == "balanceall") {
 					if(args.length === 0) {
-						window.bonkHost.menuFunctions.showStatusMessage(`* Usage: /${command} "user name"`, "#cc3333", false);
+						window.bonkHost.menuFunctions.showStatusMessage(`* Usage: /${command} "user name"`, "#b53030", false);
 						return;
 					}
 					if(!isHost()) {
-						window.bonkHost.menuFunctions.showStatusMessage("* Must be room host to use this command", "#cc3333", false);
+						window.bonkHost.menuFunctions.showStatusMessage("* Must be room host to use this command", "#b53030", false);
 						return;
 					}
 					let amount = parseInt(args[args.length - 1]);
 					if(amount < -100 || amount > 100 || isNaN(amount)) {
-						window.bonkHost.menuFunctions.showStatusMessage("* Balance must be between -100 and 100", "#cc3333", false);
+						window.bonkHost.menuFunctions.showStatusMessage("* Balance must be between -100 and 100", "#b53030", false);
 						return;
 					}
 					for(let i = 0; i < window.bonkHost.players.length; i++) {
@@ -274,10 +286,10 @@ const chatHandler = e => {
 						window.bonkHost.toolFunctions.networkEngine.sendBalance(e, amount);
 					};
 					if(amount != 0) {
-						window.bonkHost.menuFunctions.showStatusMessage("* Buff/nerf changed for all players", "#cc3333", false);
+						window.bonkHost.menuFunctions.showStatusMessage("* Buff/nerf changed for all players", "#b53030", false);
 					}
 					else {
-						window.bonkHost.menuFunctions.showStatusMessage("* Buff/nerf reset for all players", "#cc3333", false);
+						window.bonkHost.menuFunctions.showStatusMessage("* Buff/nerf reset for all players", "#b53030", false);
 					}
 					if (window.bonkHost.menuFunctions) {
 						window.bonkHost.menuFunctions.updateGameSettings();
@@ -301,26 +313,24 @@ chatObserver = new MutationObserver(e => {
 		if(mutation.type == "childList") {
 			for(let node of mutation.addedNodes) {
 				if(node.textContent === "* Accepted commands are listed above ") {
-					let helpmsg = document.createElement("div");
-					mutation.target.insertBefore(helpmsg, node.previousSibling);
-					helpmsg.outerHTML = '<div><span class="newbonklobby_chat_status" style="color: rgb(204, 51, 51);">/hhelp - commands from host mod</span></div>';
+					window.bonkHost.menuFunctions.showStatusMessage(`/hhelp - commands from host mod`, "#b53030", false);
 				}
 				else if(node.textContent[0] === "*" && node.textContent.endsWith((" has left the game "))) {
 					let userName = node.textContent.slice(2).slice(0, -19);
 					if(window.bonkHost.playerHistory[userName].guest) return;
 					let banButton = document.createElement("span");
 					banButton.className = "newbonklobby_mapsuggest_high newbonklobby_chat_link";
-					banButton.textContent = "[Ban]";
-					banButton.style = "color: rgb(204, 51, 51);";
+					banButton.textContent = "[Click to ban]";
+					banButton.style = "color: #b53030 !important;";
 					banButton.onclick = () => {
-						if(banButton.textContent === "[Ban]") {
+						if(banButton.textContent === "[Click to ban]") {
 							window.bonkHost.ban(userName);
-							banButton.textContent = "[Unban]";
+							banButton.textContent = "[Click to unban]";
 						}
 						else {
 							window.bonkHost.bans.splice(window.bonkHost.bans.indexOf(userName), 1);
-							window.bonkHost.menuFunctions.showStatusMessage(`* Removing ${userName} from ban list`, "#cc3333", false);
-							banButton.textContent = "[Ban]";
+							window.bonkHost.menuFunctions.showStatusMessage(`* Removing ${userName} from ban list`, "#b53030", false);
+							banButton.textContent = "[Click to ban]";
 						}
 					}
 					node.appendChild(banButton);
@@ -372,23 +382,20 @@ window.bonkHost.createModeDropdown = () => {
 	if (window.bonkHost.modeDropdownCreated) return;
 	window.bonkHost.modeDropdownCreated = true;
 	const dropdown = document.createElement("div");
-	dropdown.classList = "dropdown-container";
+	dropdown.classList = "newbonklobby_settings_button brownButton brownButton_classic buttonShadow";
 	const mds = dropdown.style;
 	mds.color = "#ffffff";
 	mds.position = "absolute";
 	mds.right = "15px";
 	mds.bottom = "55px";
-	mds.width = "116px";
-	mds.height = "30px";
 	mds.display = "flex";
 	mds.textAlign = "center";
 	mds.flexDirection = "column-reverse";
 
 	document.getElementById("newbonklobby_modebutton").remove();
 	let title = document.createElement("div");
-	title.classList = "dropdown-title dropdown_classic";
-	title.innerText = "MODE";
-	title.style.fontSize = "18px";
+	title.classList = "dropdown_classic";
+	title.innerText = "Mode";
 	title.id = "newbonklobby_modebutton";
 	title.style.position = "unset";
 	dropdown.appendChild(title);
@@ -488,13 +495,13 @@ window.bonkHost.handlePlayerJoined = (playerID, playerName, guest) => {
 
 window.bonkHost.ban = (playerName) => {
 	if(window.bonkHost.bans.includes(playerName)) {
-		window.bonkHost.menuFunctions.showStatusMessage("* " + playerName + " is already banned", "#cc3333", false);
+		window.bonkHost.menuFunctions.showStatusMessage("* " + playerName + " is already banned", "#b53030", false);
 		return;
 	}
 	let id = window.bonkHost.players.findIndex(e => {return e && e.userName === playerName});
 	if(id !== -1 && isHost()) {
 		if(window.bonkHost.players[id].guest) {
-			window.bonkHost.menuFunctions.showStatusMessage("* Banning guests doesn't work, so they'll get kicked instead", "#cc3333", false);
+			window.bonkHost.menuFunctions.showStatusMessage("* Banning guests doesn't work, so they'll get kicked instead", "#b53030", false);
 		}
 		else {
 			window.bonkHost.bans.push(playerName);
@@ -502,11 +509,11 @@ window.bonkHost.ban = (playerName) => {
 		window.bonkHost.toolFunctions.networkEngine.banPlayer(id);
 	}
 	else if(id !== -1) {
-		window.bonkHost.menuFunctions.showStatusMessage(`* You're not room host, but ${playerName} will be added to ban list`, "#cc3333", false);
+		window.bonkHost.menuFunctions.showStatusMessage(`* You're not room host, but ${playerName} will be added to ban list`, "#b53030", false);
 		window.bonkHost.bans.push(playerName);
 	}
 	else {
-		window.bonkHost.menuFunctions.showStatusMessage(`* Username ${playerName} not found in this room, but they'll be added to ban list`, "#cc3333", false);
+		window.bonkHost.menuFunctions.showStatusMessage(`* Username ${playerName} not found in this room, but they'll be added to ban list`, "#b53030", false);
 		window.bonkHost.bans.push(playerName);
 	}
 }
@@ -559,8 +566,8 @@ window.bonkHost.playerManagement.addPlayer = (playerEntry) => {
 	info = window.bonkHost.players.filter(p=>p).find(p => p.userName === newPlayerEntry.childNodes[1].textContent);
 	if(
 		info.team === 0 ||
-		(document.getElementById("newbonklobby_teams_middletext").textContent === "TEAMS ON" && info.team === 1) ||
-		(document.getElementById("newbonklobby_teams_middletext").textContent === "TEAMS OFF" && info.team > 1) ||
+		(window.bonkHost.toolFunctions.getGameSettings().tea && info.team === 1) ||
+		(window.bonkHost.toolFunctions.getGameSettings().tea && info.team > 1) ||
 		(
 			!window.bonkHost.freejoin &&
 			window.bonkHost.playerManagement.canBeVisible &&
