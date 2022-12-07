@@ -204,7 +204,7 @@ const chatHandler = e => {
 					window.bonkHost.menuFunctions.showStatusMessage("/balanceall -100 to 100 -- Balances everyone","#b53030",false);
 					window.bonkHost.menuFunctions.showStatusMessage("/start -- Starts the game","#b53030",false);
 					window.bonkHost.menuFunctions.showStatusMessage("/freejoin on/off -- Lets people join during the game","#b53030",false);
-					window.bonkHost.menuFunctions.showStatusMessage('/host "user name" -- Givest host to the player',"#b53030",false);
+					window.bonkHost.menuFunctions.showStatusMessage('/host "user name" -- Gives host to the player',"#b53030",false);
 					window.bonkHost.menuFunctions.showStatusMessage('/ban "user name" -- Kicks the player and prevents them from joining with the same account',"#b53030",false);
 					window.bonkHost.menuFunctions.showStatusMessage('/unban "user name" -- Unbans the player but doesn\'t remove kicked status',"#b53030",false);
 					window.bonkHost.menuFunctions.showStatusMessage('/bans -- Lists banned players',"#b53030",false);
@@ -373,7 +373,7 @@ let APPEND_SUGGESTION_MODE_BUTTON = `
 }
 `;
 
-let modeStuff = newStr.match(/[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\]=class [A-Za-z0-9\$_]{3}\{constructor.{1,400}=2;/)[0].split("=")[0];
+let modeStuff = newStr.match(/[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\]=class [A-Za-z0-9\$_]{3}\{constructor.{1,400}this\[[A-Za-z0-9\$_]{3}(\[[0-9]{1,3}\]){2}\]=2;/)[0].split("=")[0];
 
 let modesObject =`${modeStuff}.modes`;
 
@@ -572,8 +572,10 @@ window.bonkHost.playerManagement.addPlayer = (playerEntry) => {
 			!window.bonkHost.freejoin &&
 			window.bonkHost.playerManagement.canBeVisible &&
 			window.bonkHost.inGame &&
-			window[BIGVAR].bonkHost.state.discs[window.bonkHost.players.findIndex(i => {return i && i.userName === newPlayerEntry.children[1].textContent})] == undefined &&
-			window[BIGVAR].bonkHost.state.discDeaths.findIndex(i => {return i.i === window.bonkHost.players.findIndex(i => {return i && i.userName === newPlayerEntry.children[1].textContent})})
+			!(
+				window[BIGVAR].bonkHost.state.discs[window.bonkHost.players.findIndex(i => {return i && i.userName === newPlayerEntry.children[1].textContent})] === undefined &&
+				window[BIGVAR].bonkHost.state.discDeaths.findIndex(i => {return i.i === window.bonkHost.players.findIndex(i => {return i && i.userName === newPlayerEntry.children[1].textContent})}) === -1
+			)
 		)
 	) {
 		newPlayerEntry.style.filter = "opacity(0.4)";
@@ -849,13 +851,13 @@ document.getElementById("ingamechatinputtext").addEventListener("keydown", autoc
 	document.addEventListener("mousemove", mouse => {
 		if(selectedPlayer) {
 			document.body.style.pointerEvents = "none";
-			let wheelType = (document.getElementById("newbonklobby_teams_middletext").textContent === "TEAMS OFF") ? "selectionWheel" : "selectionWheelTeams";
+			let wheelType = (!window.bonkHost.toolFunctions.getGameSettings().tea) ? "selectionWheel" : "selectionWheelTeams";
 			document.getElementById(wheelType).style.display = "";
 			document.getElementById(wheelType).style.top = start[0]-document.getElementById(wheelType).getBoundingClientRect().height/2+"px";
 			document.getElementById(wheelType).style.left = start[1]-document.getElementById(wheelType).getBoundingClientRect().width/2+"px";
 			end = [mouse.clientY, mouse.clientX];
 			if(Math.sqrt((end[0]-start[0])**2 + (end[1]-start[1])**2) >= innerWheelRadius) {
-				if(document.getElementById("newbonklobby_teams_middletext").textContent === "TEAMS OFF") {
+				if(!window.bonkHost.toolFunctions.getGameSettings().tea) {
 					let angle = end[1] < start[1];
 					if(angle) {
 						document.getElementById("selectionWheel").children[0].children[0].children[0].style.opacity = 1;
@@ -908,7 +910,7 @@ document.getElementById("ingamechatinputtext").addEventListener("keydown", autoc
 		document.body.style.removeProperty("pointer-events");
 		end = [mouse.clientY, mouse.clientX];
 		if(Math.sqrt((end[0]-start[0])**2 + (end[1]-start[1])**2) >= innerWheelRadius) {
-			if(document.getElementById("newbonklobby_teams_middletext").textContent === "TEAMS OFF") {
+			if(!window.bonkHost.toolFunctions.getGameSettings().tea) {
 			for(let child of [...document.getElementById("selectionWheel").children[0].children]) {
 				child.children[0].style.opacity = 0.5;
 			}
