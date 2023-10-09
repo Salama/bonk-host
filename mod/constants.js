@@ -62,7 +62,7 @@ const moveEveryone = (team) => {
 	}
 }
 
-const BIGVAR = newStr.match(/[A-Za-z0-9$]+\[[0-9]{6}\]/)[0].split('[')[0];
+const BIGVAR = newStr.match(/[A-Za-z0-9$_]+\[[0-9]{6}\]/)[0].split('[')[0];
 
 const isHost = () => {
 	return window.bonkHost.toolFunctions.networkEngine.getLSID() === window.bonkHost.toolFunctions.networkEngine.hostID && !window.bonkHost.toolFunctions.getGameSettings().q;
