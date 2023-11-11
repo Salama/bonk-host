@@ -9,6 +9,10 @@ window.bonkHost.playerHistory = {};
 
 window.bonkCommands = window.bonkCommands.concat(["/kick", "/mute", "/unmute", "/lock", "/unlock", "/balance", "/fav", "/unfav", "/curate", "/curateyes", "/curateno", "/hhelp", "/balanceall", "/start", "/freejoin", "/host", "/ban", "/bans", "/unban"]);
 
+if(!localStorage.getItem("bonkHost")) {
+	localStorage.setItem("bonkHost", "{}");
+}
+
 let hostPlayerMenuCSS = document.createElement('style');
 hostPlayerMenuCSS.innerHTML = `
 /***HOSTMENU_CSS***/
@@ -75,6 +79,7 @@ window.bonkHost.wrap = () => {
 			clearInterval(gameLoadedWaiter);
 		}
 		else return;
+
 		// Wrap menuFunctions
 		for(const i of Object.keys(window.bonkHost.menuFunctions)) {
 			if(typeof window.bonkHost.menuFunctions[i] !== "function") continue;
@@ -629,7 +634,7 @@ window.bonkHost.handleHostChange = (host) => {
 	}
 }
 
-window.bonkHost.playerManagement.collapse = () => {
+window.bonkHost.playerManagement.collapse = (saveToLocalStorage = true) => {
 	if(document.getElementById('hostPlayerMenu').style.visibility != "hidden") {
 		document.getElementById('hostPlayerMenuControls').style.display = "none";
 		document.getElementById('hostPlayerMenuControls').visibility = "hidden";
@@ -650,6 +655,15 @@ window.bonkHost.playerManagement.collapse = () => {
 		document.getElementById('hostPlayerMenuCollapse').textContent = "-";
 		setTimeout(() => {document.getElementById('hostPlayerMenuControls').style.removeProperty("display");}, 100);
 	}
+	if(saveToLocalStorage) {
+		let ls = JSON.parse(localStorage.getItem("bonkHost"));
+		ls.collapse = (document.getElementById('hostPlayerMenu').style.visibility == "hidden");
+		localStorage.setItem("bonkHost", JSON.stringify(ls));
+	}
+}
+
+if(JSON.parse(localStorage.getItem("bonkHost")).collapse) {
+	window.bonkHost.playerManagement.collapse(false);
 }
 
 window.bonkHost.playerManagement.getPlayer = (playerEntry, exact = false) => {
