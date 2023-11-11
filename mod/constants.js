@@ -128,6 +128,12 @@ window.bonkHost.wrap = () => {
 						})
 						window.bonkHost.updatePlayers();
 						break;
+					case "updatePings":
+						let pings = window.bonkHost.players.filter(e=>e).map(e=>e.ping);
+						for(let i = 0; i < [...document.getElementById("hostPlayerMenuBox").children].length; i++) {
+							document.getElementById("hostPlayerMenuBox").children[i].getElementsByClassName("newbonklobby_playerentry_pingtext")[0].textContent = pings[i] + "ms";
+						}
+						break;
 				}
 				return response;
 			}
@@ -556,7 +562,6 @@ window.bonkHost.playerManagement.addPlayer = (playerEntry) => {
 	let newPlayerEntry = playerEntry.cloneNode(true);
 	newPlayerEntry.classList.remove('newbonklobby_playerentry_half');
 	newPlayerEntry.getElementsByClassName("newbonklobby_playerentry_ping")[0].remove();
-	newPlayerEntry.getElementsByClassName("newbonklobby_playerentry_pingtext")[0].remove();
 	newPlayerEntry.getElementsByClassName("newbonklobby_playerentry_host")[0].remove();
 	if(isHost()) {
 		playerEntry.addEventListener('click', (e) => {
