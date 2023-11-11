@@ -7,7 +7,7 @@ window.bonkHost.playerManagement.canBeVisible = false;
 window.bonkHost.bonkCallbacks = {};
 window.bonkHost.playerHistory = {};
 
-window.bonkCommands = window.bonkCommands.concat(["/kick", "/mute", "/unmute", "/lock", "/unlock", "/balance", "/fav", "/unfav", "/curate", "/curateyes", "/curateno", "/hhelp", "/balanceall", "/start", "/freejoin", "/host", "/ban", "/bans", "/unban"]);
+window.bonkCommands = window.bonkCommands.concat(["/kick", "/mute", "/unmute", "/lock", "/unlock", "/balance", "/fav", "/unfav", "/curate", "/curateyes", "/curateno", "/hhelp", "/balanceall", "/start", "/freejoin", "/host", "/ban", "/bans", "/unban", "/resetpos"]);
 
 if(!localStorage.getItem("bonkHost")) {
 	localStorage.setItem("bonkHost", "{}");
@@ -213,6 +213,7 @@ const chatHandler = e => {
 					window.bonkHost.menuFunctions.showStatusMessage('/ban "user name" -- Kicks the player and prevents them from joining with the same account',"#b53030",false);
 					window.bonkHost.menuFunctions.showStatusMessage('/unban "user name" -- Unbans the player but doesn\'t remove kicked status',"#b53030",false);
 					window.bonkHost.menuFunctions.showStatusMessage('/bans -- Lists banned players',"#b53030",false);
+					window.bonkHost.menuFunctions.showStatusMessage('/resetpos -- Resets host menu position',"#b53030",false);
 				}
 				else if(command == "start") {
 					if(!isHost()) {
@@ -301,7 +302,15 @@ const chatHandler = e => {
 						window.bonkHost.menuFunctions.updatePlayers();
 					}
 				}
-				
+				else if(command == "resetpos") {
+					document.getElementById("hostPlayerMenu").style.removeProperty("top");
+					document.getElementById("hostPlayerMenu").style.removeProperty("bottom");
+					document.getElementById("hostPlayerMenu").style.removeProperty("left");
+					document.getElementById("hostPlayerMenu").style.removeProperty("right");
+					let ls = JSON.parse(localStorage.getItem("bonkHost"));
+					ls.position = undefined;
+					localStorage.setItem("bonkHost", JSON.stringify(ls));
+				}
 				else {
 					e.target.value = oldMsg;
 				}
@@ -665,6 +674,70 @@ window.bonkHost.playerManagement.collapse = (saveToLocalStorage = true) => {
 if(JSON.parse(localStorage.getItem("bonkHost")).collapse) {
 	window.bonkHost.playerManagement.collapse(false);
 }
+
+{
+	let position = JSON.parse(localStorage.getItem("bonkHost")).position;
+	if(position !== undefined) {
+		document.getElementById("hostPlayerMenu").style.left = position.left;
+		document.getElementById("hostPlayerMenu").style.right = position.right;
+		document.getElementById("hostPlayerMenu").style.top = position.top;
+		document.getElementById("hostPlayerMenu").style.bottom = position.bottom;
+	}
+}
+
+// Host menu mover
+
+let startGrabPoint = {x:0,y:0};
+let grabbing = false;
+const hostMenuMover = e => {
+	if(e.x - startGrabPoint.x < document.body.clientWidth / 2) {
+		document.getElementById("hostPlayerMenu").style.left = e.x + startGrabPoint.x - document.getElementById("hostPlayerMenu").clientWidth;
+		document.getElementById("hostPlayerMenu").style.right = "unset";
+	}
+	else {
+		document.getElementById("hostPlayerMenu").style.right = document.body.clientWidth - e.x - startGrabPoint.x;
+		document.getElementById("hostPlayerMenu").style.left = "unset";
+	}
+
+	if(e.y - startGrabPoint.y < document.body.clientHeight / 2) {
+		document.getElementById("hostPlayerMenu").style.top = e.y - startGrabPoint.y;
+		document.getElementById("hostPlayerMenu").style.bottom = "unset";
+	}
+	else {
+		document.getElementById("hostPlayerMenu").style.bottom = document.body.clientHeight - e.y + startGrabPoint.y - document.getElementById("hostPlayerMenu").clientHeight;
+		document.getElementById("hostPlayerMenu").style.top = "unset";
+	}
+}
+
+window.bonkHost.playerManagement.startGrab = e => {
+	grabbing = true;
+	document.getElementById("hostPlayerMenuGrab").style.cursor = "grabbing"
+	document.getElementById("hostPlayerMenu").style.transition = "unset";
+	startGrabPoint.x = e.offsetX;
+	startGrabPoint.y = e.offsetY;
+	document.body.addEventListener("pointermove", hostMenuMover);
+}
+
+window.bonkHost.playerManagement.endGrab = e => {
+	if(!grabbing) return;
+	grabbing = false;
+	document.getElementById("hostPlayerMenuGrab").style.cursor = "grab";
+	document.getElementById("hostPlayerMenu").style.removeProperty("transition");
+	document.body.removeEventListener("pointermove", hostMenuMover);
+	let ls = JSON.parse(localStorage.getItem("bonkHost"));
+	ls.position = {
+		left: document.getElementById("hostPlayerMenu").style.left,
+		right: document.getElementById("hostPlayerMenu").style.right,
+		top: document.getElementById("hostPlayerMenu").style.top,
+		bottom: document.getElementById("hostPlayerMenu").style.bottom
+	};
+	localStorage.setItem("bonkHost", JSON.stringify(ls));
+}
+
+document.getElementById("hostPlayerMenuGrab").addEventListener("pointerdown", window.bonkHost.playerManagement.startGrab);
+document.body.addEventListener("pointerup", window.bonkHost.playerManagement.endGrab);
+
+// Helper functions
 
 window.bonkHost.playerManagement.getPlayer = (playerEntry, exact = false) => {
 	if (exact) {
