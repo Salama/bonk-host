@@ -828,23 +828,28 @@ window.bonkHost.shufflePlayers = () => {
 	}
 }
 
-document.getElementById('maploadwindowmapscontainer').addEventListener('DOMNodeInserted', e => {
-	let mode = e.relatedNode.getElementsByClassName('maploadwindowtextmode')[0];
-	if(mode === undefined) mode = e.relatedNode.getElementsByClassName('maploadwindowtextmode_picks')[0];
-	if(mode === undefined) return;
-	if(mode.textContent !== "Any Mode") {
-		mode.classList.add('brownButton');
-		mode.classList.add('brownButton_classic');
-		mode.classList.add('buttonShadow');
-		mode.style.padding = "2px";
-		mode.style.width = "90px";
-	}
-	mode.addEventListener("click", e => {
-		if(!document.getElementById('newbonklobby_modebutton').classList.contains("brownButtonDisabled")) {
-			window.bonkHost.bonkSetMode(Object.entries(window.bonkHost.bonkModesObject).filter(e => {return e[1].lobbyName === mode.textContent})[0][0]);
+let mapSelectionObserver = new MutationObserver(mutations => {
+	for(let mutation of mutations) {
+		for(let e of mutation.addedNodes) {
+			let mode = e.getElementsByClassName('maploadwindowtextmode')[0];
+			if(mode === undefined) mode = e.relatedNode.getElementsByClassName('maploadwindowtextmode_picks')[0];
+			if(mode === undefined) return;
+			if(mode.textContent !== "Any Mode") {
+				mode.classList.add('brownButton');
+				mode.classList.add('brownButton_classic');
+				mode.classList.add('buttonShadow');
+				mode.style.padding = "2px";
+				mode.style.width = "90px";
+			}
+			mode.addEventListener("click", e => {
+				if(!document.getElementById('newbonklobby_modebutton').classList.contains("brownButtonDisabled")) {
+					window.bonkHost.bonkSetMode(Object.entries(window.bonkHost.bonkModesObject).filter(e => {return e[1].lobbyName === mode.textContent})[0][0]);
+				}
+			});
 		}
-	})
+	}
 });
+mapSelectionObserver.observe(document.getElementById('maploadwindowmapscontainer'), {attributes: false, childList: true, subtree: false});
 
 /*Autocomplete*/
 
