@@ -904,6 +904,7 @@ const autocomplete = e => {
 				let maxAutocomplete = "";
 				let char = "";
 				for (let j = 0; j >= 0; j++) {
+					if(char === undefined) break;
 					maxAutocomplete += char;
 					char = "";
 					for (let k = 0; k < foundAutocompletes.length; k++) {
