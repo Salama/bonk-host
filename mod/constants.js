@@ -6,6 +6,11 @@ window.bonkHost.inGame = false;
 window.bonkHost.playerManagement.canBeVisible = false;
 window.bonkHost.bonkCallbacks = {};
 window.bonkHost.playerHistory = {};
+window.bonkHost.cheatWarning = [];
+window.bonkHost.lagHistory = [];
+window.bonkHost.lagginessHistory = [];
+window.bonkHost.fig = 0;
+window.bonkHost.cheatDetection = false;
 
 window.bonkCommands = window.bonkCommands.concat(["/kick", "/mute", "/unmute", "/lock", "/unlock", "/balance", "/fav", "/unfav", "/curate", "/curateyes", "/curateno", "/hhelp", "/balanceall", "/start", "/freejoin", "/host", "/ban", "/bans", "/unban", "/resetpos"]);
 
@@ -102,9 +107,7 @@ window.bonkHost.wrap = () => {
 					case "hide":
 						window.bonkHost.menuFunctions.visible = true;
 						window.bonkHost.playerManagement.canBeVisible = true;
-						if(isHost()) {
-							window.bonkHost.playerManagement.show();
-						}
+						window.bonkHost.playerManagement.show();
 						break;
 					case "handleHostChange":
 					case "handleHostLeft":
@@ -138,6 +141,7 @@ window.bonkHost.wrap = () => {
 				return response;
 			}
 		}
+
 		for(const i of Object.keys(window.bonkHost.toolFunctions.networkEngine)) {
 			if(typeof window.bonkHost.toolFunctions.networkEngine[i] !== "function") continue;
 			const ogFunc = window.bonkHost.toolFunctions.networkEngine[i];
@@ -150,10 +154,60 @@ window.bonkHost.wrap = () => {
 					case "changeOwnTeam":
 						window.bonkHost.playerManagement.movePlayer(arguments[0]);
 						break;
+					case "destroy":
+						window.bonkHost.playerManagement.hide();
+						window.bonkHost.cheatWarning = [];
+						window.bonkHost.lagHistory = [];
+						window.bonkHost.lagginessHistory = [];
+						break;
 				}
 				return response;
 			}
 		}
+
+		for(const i of Object.keys(window.bonkHost.toolFunctions)) {
+			if(typeof window.bonkHost.toolFunctions[i] !== "function") continue;
+			const ogFunc = window.bonkHost.toolFunctions[i];
+			window.bonkHost.toolFunctions[i] = function() {
+				let response = ogFunc.apply(window.bonkHost.toolFunctions, arguments);
+				switch(i) {
+					case "recvInputs":
+						if(arguments[2] !== "node") break;
+						let playerId = arguments[0];
+						let packet = arguments[1];
+						if(packet.type === "commands") {
+							window.bonkHost.cheatWarning[playerId] = true;
+						}
+						if(window.bonkHost.cheatDetection) {
+							let ping = (window.bonkHost.players[playerId].ping + window.bonkHost.players[window.bonkHost.toolFunctions.networkEngine.getLSID()].ping) / 2;
+
+							if(isNaN(packet.f - window.bonkHost.fig)) {
+								return;
+							}
+							if(!window.bonkHost.lagHistory[playerId]) window.bonkHost.lagHistory[playerId] = [];
+							if(!window.bonkHost.lagginessHistory[playerId]) window.bonkHost.lagginessHistory[playerId] = [];
+							window.bonkHost.lagHistory[playerId].push(Math.floor(1000*(1/30)*(packet.f - window.bonkHost.fig)) + ping);
+							if(window.bonkHost.lagHistory[playerId].length > 20) {
+								window.bonkHost.lagHistory[playerId].shift();
+							}
+
+							let avgPingDiff = (window.bonkHost.lagHistory[playerId].length > 2) ?
+								((
+									window.bonkHost.lagHistory[playerId].reduce((a, b) => a+b) -
+									Math.max.apply(Math, window.bonkHost.lagHistory[playerId]) -
+									Math.min.apply(Math, window.bonkHost.lagHistory[playerId])
+								) / window.bonkHost.lagHistory[playerId].length - 2) : 0
+
+							if(isNaN(avgPingDiff)) return;
+							window.bonkHost.lagginessHistory[playerId].push(avgPingDiff);
+							window.bonkHost.drawLagginess(playerId);
+						}
+						break;
+				}
+				return response;
+			}
+		}
+
 		for(const i of Object.keys(window.bonkHost.stateFunctions)) {
 			if(typeof window.bonkHost.stateFunctions[i] !== "function") continue;
 			const ogFunc = window.bonkHost.stateFunctions[i];
@@ -165,11 +219,13 @@ window.bonkHost.wrap = () => {
 						window.bonkHost.playerManagement.canBeVisible = true;
 						window.bonkHost.menuFunctions.visible = true;
 						window.bonkHost.menuFunctions.updatePlayers();
+						window.bonkHost.playerManagement.show();
 						break;
 				}
 				return response;
 			}
 		}
+
 		// Wrap step function
 		const step = window.bonkHost.bigClass.prototype.step;
 		window.bonkHost.bigClass.prototype.step = function() {
@@ -397,6 +453,49 @@ let modeStuff = newStr.match(/[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\]=class [A-Za-z0-9\$
 
 let modesObject =`${modeStuff}.modes`;
 
+window.bonkHost.drawLagginess = (playerId) => {
+	if(window.bonkHost.lagginessHistory[playerId] === undefined || !window.bonkHost.players[playerId] || window.bonkHost.toolFunctions.networkEngine.getLSID() === playerId) return false;
+	let graph = document.getElementById("hostPlayerMenuCheatBox").children[window.bonkHost.players.filter(p=>p).indexOf(window.bonkHost.players[playerId])];
+	if(graph.width !== graph.clientWidth && document.getElementById('hostPlayerMenu').style.visibility != "hidden") {
+		graph.width = graph.clientWidth;
+	}
+	while (window.bonkHost.lagginessHistory[playerId].length > graph.clientWidth) {
+		window.bonkHost.lagginessHistory[playerId].shift();
+	}
+	let ctx = graph.getContext("2d");
+	ctx.scale(1, -1);
+	ctx.beginPath();
+	ctx.clearRect(0, 0, graph.width, graph.height);
+	ctx.strokeStyle = "#0f0";
+	let max = Math.max(0, Math.max.apply(Math, window.bonkHost.lagginessHistory[playerId]));
+	let min = Math.min(-60, Math.min.apply(Math, window.bonkHost.lagginessHistory[playerId])) - max;
+	ctx.moveTo(0, (window.bonkHost.lagginessHistory[playerId][0] - max) / min * graph.height);
+	for(let i = 1; i < window.bonkHost.lagginessHistory[playerId].length; i++) {
+		ctx.lineTo(i, (window.bonkHost.lagginessHistory[playerId][i] - max) / min * graph.height);
+	}
+	ctx.stroke();
+	for(let i = 1; i < 11; i++) {
+		if (min - Math.abs(max) < -5 - i * graph.height) {
+			ctx.beginPath();
+			ctx.strokeStyle = "#f00";
+			ctx.moveTo(0, (-5 - i*graph.height - max) / min * graph.height);
+			ctx.lineTo(300, (-5 - i*graph.height - max) / min * graph.height);
+			ctx.stroke();
+		}
+		else {
+			break;
+		}
+	}
+	if(window.bonkHost.cheatWarning[playerId]) {
+		ctx.font = "16px monospace";
+		ctx.fillText("⚠️", 0, 16);
+	}
+	if(window.bonkHost.lagginessHistory[playerId] === undefined || !window.bonkHost.players[playerId] || window.bonkHost.toolFunctions.networkEngine.getLSID() === playerId) {
+		ctx.clearRect(0, 0, graph.width, graph.height);
+	}
+	return true;
+}
+
 window.bonkHost.modeDropdownCreated = false;
 window.bonkHost.createModeDropdown = () => {
 	if (window.bonkHost.modeDropdownCreated) return;
@@ -505,6 +604,17 @@ document.getElementById('hostPlayerMenuFreejoin').addEventListener('change', (e)
 
 document.getElementById('hostPlayerMenuTeamlock').addEventListener('change', () => {
 	document.getElementById('newbonklobby_teamlockbutton').onclick();
+});
+
+document.getElementById('hostPlayerMenuCheatDetectionCheckbox').addEventListener('change', (e) => {
+	window.bonkHost.cheatDetection = e.target.checked;
+	if(window.bonkHost.cheatDetection) {
+		document.getElementById('hostPlayerCheatDetection').style.left = "95%";
+	}
+	else {
+		document.getElementById('hostPlayerCheatDetection').style.left = "0";
+	}
+	window.bonkHost.menuFunctions.updatePlayers();
 });
 
 window.bonkHost.handlePlayerJoined = (playerID, playerName, guest) => {
@@ -624,6 +734,15 @@ window.bonkHost.playerManagement.addPlayer = (playerEntry) => {
 	});
 	observer.observe(playerEntry.children[0], { childList: true });
 	hostPlayerMenuBox.appendChild(newPlayerEntry);
+	for(let i = 0; i < [...document.getElementById("hostPlayerMenuCheatBox").children].length; i++) {
+		let graph = document.getElementById("hostPlayerMenuCheatBox").children[i];
+		let playerId = window.bonkHost.players.indexOf(window.bonkHost.players.filter(p=>p)[i]);
+		if(!window.bonkHost.drawLagginess(playerId)) {
+			let ctx = graph.getContext("2d");
+			ctx.scale(1, -1);
+			ctx.clearRect(0, 0, graph.width, graph.height);
+		}
+	}
 }
 
 window.bonkHost.playerManagement.removePlayer = (playerEntry) => {
@@ -634,7 +753,7 @@ window.bonkHost.playerManagement.removePlayer = (playerEntry) => {
 }
 
 window.bonkHost.playerManagement.show = () => {
-	if(!window.bonkHost.playerManagement.canBeVisible) return;
+	if(!window.bonkHost.playerManagement.canBeVisible || document.getElementById("gamerenderer").style.visibility != "inherit") return;
 	if(parent.document.getElementById('adboxverticalleftCurse') != null)
 		parent.document.getElementById('adboxverticalleftCurse').style.display = "none";
 	document.getElementById("hostPlayerMenuKeepPositions").parentNode.parentNode.style.filter = (window.bonkHost.toolFunctions.getGameSettings().map.s.re ? "" : "brightness(0.5)");
@@ -643,6 +762,11 @@ window.bonkHost.playerManagement.show = () => {
 	document.getElementById('hostPlayerMenu').style.display = "unset";
 	window.bonkHost.menuFunctions.updatePlayers();
 	window.bonkHost.inGame = true;
+	for(let graph of [...document.getElementById("hostPlayerMenuCheatBox").children]) {
+		let ctx = graph.getContext("2d");
+		ctx.scale(1, -1);
+		ctx.clearRect(0, 0, graph.width, graph.height);
+	}
 }
 
 window.bonkHost.playerManagement.hide = () => {
@@ -653,6 +777,7 @@ window.bonkHost.playerManagement.hide = () => {
 }
 
 window.bonkHost.handleHostChange = (host) => {
+	return;
 	if(host) {
 		window.bonkHost.playerManagement.show();
 	}
@@ -963,7 +1088,7 @@ document.getElementById("ingamechatinputtext").addEventListener("keydown", autoc
 		if(selectedPlayer) {
 			document.body.style.pointerEvents = "none";
 			let wheelType = (!window.bonkHost.toolFunctions.getGameSettings().tea) ? "selectionWheel" : "selectionWheelTeams";
-			document.getElementById(wheelType).style.display = "";
+			document.getElementById(wheelType).style.display = "block";
 			document.getElementById(wheelType).style.top = start[0]-document.getElementById(wheelType).getBoundingClientRect().height/2+"px";
 			document.getElementById(wheelType).style.left = start[1]-document.getElementById(wheelType).getBoundingClientRect().width/2+"px";
 			end = [mouse.clientY, mouse.clientX];

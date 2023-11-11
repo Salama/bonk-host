@@ -72,3 +72,7 @@ let callbacks = [...newStr.match(/[A-Za-z0-9\$_]{3}\(\.\.\./g)];
 for(let callback of callbacks) {
 	patch(`function ${callback}`, `window.bonkHost.bonkCallbacks["${callback.split("(")[0]}"] = ${callback.split("(")[0]};` + `function ${callback}`);
 }
+
+//Frames in game
+let fig = newStr.match(/\[[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\] \- 30\]/)[0].split(' ')[0].slice(1);
+patch(`${fig}++;`, `${fig}++;window.bonkHost.fig=${fig};`);
