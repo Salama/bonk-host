@@ -455,7 +455,20 @@ let SET_STATE = `
 if(${BIGVAR}.bonkHost.state && window.bonkHost.keepState && window.bonkHost.toolFunctions.getGameSettings().map.s.re) {
 	for(let i = 0; i < ${BIGVAR}.bonkHost.state.discs.length; i++) {
 		if(${BIGVAR}.bonkHost.state.discs[i] != undefined) {
-			${stateCreationString}.discs[i] = ${BIGVAR}.bonkHost.state.discs[i];
+			if(${BIGVAR}.bonkHost.state.discs[i].team !== window.bonkHost.players[i].team) {
+				let discInfo = JSON.parse(JSON.stringify(${stateCreationString}.discs[i]));
+				${stateCreationString}.discs[i] = ${BIGVAR}.bonkHost.state.discs[i];
+				${stateCreationString}.discs[i].sx = discInfo.sx;
+				${stateCreationString}.discs[i].sy = discInfo.sy;
+				${stateCreationString}.discs[i].sxv = discInfo.svx;
+				${stateCreationString}.discs[i].syv = discInfo.syv;
+				${stateCreationString}.discs[i].spawnTeamInfo = discInfo.spawnTeamInfo;
+				${stateCreationString}.discs[i].team = discInfo.team;
+				
+			}
+			else {
+				${stateCreationString}.discs[i] = ${BIGVAR}.bonkHost.state.discs[i];
+			}
 			if(window.bonkHost.toolFunctions.getGameSettings().mo=='sp') {
 				${stateCreationString}.discs[i].a1a -= 2*30*3;
 			}
