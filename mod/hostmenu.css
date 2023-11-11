@@ -50,10 +50,10 @@
 	min-width: inherit;
 	max-width: inherit;
 	height: inherit;
-	position: absolute;
 	border-radius: 7px;
     transition: ease-in-out 100ms;
 	opacity: 70%;
+	visibility: hidden;
 }
 
 #hostPlayerCheatDetection canvas {

@@ -610,9 +610,11 @@ document.getElementById('hostPlayerMenuCheatDetectionCheckbox').addEventListener
 	window.bonkHost.cheatDetection = e.target.checked;
 	if(window.bonkHost.cheatDetection) {
 		document.getElementById('hostPlayerCheatDetection').style.left = "95%";
+		document.getElementById('hostPlayerCheatDetection').style.visibility = "visible";
 	}
 	else {
 		document.getElementById('hostPlayerCheatDetection').style.left = "0";
+		document.getElementById('hostPlayerCheatDetection').style.visibility = "hidden";
 	}
 	window.bonkHost.menuFunctions.updatePlayers();
 });
