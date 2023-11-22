@@ -4,6 +4,7 @@
 // @author       Salama
 // @description  /***DESCRIPTION***/
 // @match        https://bonk.io/gameframe-release.html
+// @match        https://bonkisback.io/gameframe-release.html
 // @run-at       document-start
 // @grant        none
 // @supportURL   https://discord.gg/Dj6usq7ww3
