@@ -37,7 +37,7 @@ patch(`function ${BIGVAR}(){}`, `function ${BIGVAR}(){}${BIGVAR}.bonkHost={};`);
 
 //Save latest state
 const stateRegex = newStr.match(/[A-Z]\[[A-Za-z0-9\$_]{3}(\[[0-9]{1,3}\]){2}\]={discs/)[0];
-patch(stateRegex, `${BIGVAR}.bonkHost.state=arguments[0];` + stateRegex);
+patch(stateRegex, STEP_BEGIN + stateRegex);
 
 //Apply latest state
 const stateSetRegex = newStr.match(/\* 999\),[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\],null,[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\],true\);/)[0];

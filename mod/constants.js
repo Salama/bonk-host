@@ -76,6 +76,7 @@ const BIGVAR = newStr.match(/[A-Za-z0-9$_]+\[[0-9]{6}\]/)[0].split('[')[0];
 const isHost = () => {
 	return window.bonkHost.toolFunctions.networkEngine.getLSID() === window.bonkHost.toolFunctions.networkEngine.hostID && !window.bonkHost.toolFunctions.getGameSettings().q;
 }
+
 window.bonkHost.wrap = () => {
 	// Event for when game finishes loading. Using a setInterval isn't optimal and we might miss some, but it's good enough for now
 	const gameLoadedWaiter = setInterval(() => {
@@ -224,13 +225,6 @@ window.bonkHost.wrap = () => {
 				}
 				return response;
 			}
-		}
-
-		// Wrap step function
-		const step = window.bonkHost.bigClass.prototype.step;
-		window.bonkHost.bigClass.prototype.step = function() {
-			window[BIGVAR].bonkHost.state = argsuments[0];
-			step.apply(this, arguments);
 		}
 	}, 50);
 }
@@ -384,7 +378,7 @@ const chatHandler = e => {
 document.getElementById("newbonklobby_chat_input").addEventListener("keydown", chatHandler, true);
 document.getElementById("ingamechatinputtext").addEventListener("keydown", chatHandler, true);
 
-chatObserver = new MutationObserver(e => {
+const chatObserver = new MutationObserver(e => {
 	for(let mutation of e) {
 		if(mutation.type == "childList") {
 			for(let node of mutation.addedNodes) {
@@ -556,7 +550,7 @@ stateCreationStringIndex = stateCreationStringIndex[stateCreationStringIndex.len
 let stateCreation = newStr.match(`[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\]=[A-Za-z0-9\$_]{3}\\[[0-9]{1,4}\\]\\[[A-Za-z0-9\$_]{3}\\[[0-9]{1,4}\\]\\[${stateCreationStringIndex}\\]\\].+?(?=;);`)[0];
 stateCreationString = stateCreation.split(']')[0] + "]";
 
-let SET_STATE = `
+const SET_STATE = `
 if(${BIGVAR}.bonkHost.state && window.bonkHost.keepState && window.bonkHost.toolFunctions.getGameSettings().map.s.re) {
 	for(let i = 0; i < ${BIGVAR}.bonkHost.state.discs.length; i++) {
 		if(${BIGVAR}.bonkHost.state.discs[i] != undefined) {
@@ -595,6 +589,25 @@ if(${BIGVAR}.bonkHost.state && window.bonkHost.keepState && window.bonkHost.tool
 };
 if(${stateCreationString}.scores.length > 0 && document.getElementById('hostPlayerMenuKeepScores').checked) {
 	${stateCreationString}.scores = ${BIGVAR}.bonkHost.state.scores;
+}
+`;
+
+// Step function beginning
+// First 2 score indexes are null if teams are on
+const STEP_BEGIN = `
+{
+	let state = arguments[0];
+	let gs = arguments[4];
+	if(gs.tea) {
+		let teams = state.players.filter(p=>p).map(p=>p.team);
+		for(let i = 2; i < 7; i++) {
+			if(state.scores[i] && state.scores[i] === 0 && !teams.includes(i)) {
+				state.scores[i] = null;
+			}
+		}
+		state.scores = [null, null, ...state.scores.slice(2, 6)];
+	}
+	${BIGVAR}.bonkHost.state = state;
 }
 `;
 
