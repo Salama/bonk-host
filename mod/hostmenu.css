@@ -7,10 +7,17 @@
     position: absolute;
     left: 10px;
     top: 60px;
+    bottom: unset;
     border-radius: 7px;
     display: none;
     transition: ease-in-out 100ms;
     z-index: 100;
+    overflow: visible;
+}
+
+#hostPlayerMenuBox {
+    top: 32px;
+    height: calc(47px * 8);
 }
 
 #hostPlayerMenuCollapse {
