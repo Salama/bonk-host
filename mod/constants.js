@@ -12,7 +12,7 @@ window.bonkHost.lagginessHistory = [];
 window.bonkHost.fig = 0;
 window.bonkHost.cheatDetection = false;
 
-window.bonkCommands = window.bonkCommands.concat(["/kick", "/mute", "/unmute", "/lock", "/unlock", "/balance", "/fav", "/unfav", "/curate", "/curateyes", "/curateno", "/hhelp", "/balanceall", "/start", "/freejoin", "/host", "/ban", "/bans", "/unban", "/resetpos"]);
+window.bonkCommands = window.bonkCommands.concat(["/kick", "/mute", "/unmute", "/lock", "/unlock", "/balance", "/fav", "/unfav", "/curate", "/curateyes", "/curateno", "/roomname", "/roompass", "/clearroompass", "/hhelp", "/balanceall", "/start", "/freejoin", "/host", "/ban", "/bans", "/unban", "/resetpos"]);
 
 if(!localStorage.getItem("bonkHost")) {
 	localStorage.setItem("bonkHost", "{}");
