@@ -551,7 +551,7 @@ let stateCreation = newStr.match(`[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\]=[A-Za-z0-9\$_]
 stateCreationString = stateCreation.split(']')[0] + "]";
 
 const SET_STATE = `
-if(${BIGVAR}.bonkHost.state && window.bonkHost.keepState && window.bonkHost.toolFunctions.getGameSettings().map.s.re) {
+if(${BIGVAR}.bonkHost.state && window.bonkHost.keepState && window.bonkHost.toolFunctions.getGameSettings().map.s.re && window.bonkHost.toolFunctions.getGameSettings().ga === "b") {
 	for(let i = 0; i < ${BIGVAR}.bonkHost.state.discs.length; i++) {
 		if(${BIGVAR}.bonkHost.state.discs[i] != undefined) {
 			if(${BIGVAR}.bonkHost.state.discs[i].team !== window.bonkHost.players[i].team) {
@@ -563,13 +563,12 @@ if(${BIGVAR}.bonkHost.state && window.bonkHost.keepState && window.bonkHost.tool
 				${stateCreationString}.discs[i].syv = discInfo.syv;
 				${stateCreationString}.discs[i].spawnTeamInfo = discInfo.spawnTeamInfo;
 				${stateCreationString}.discs[i].team = discInfo.team;
-				
 			}
 			else {
 				${stateCreationString}.discs[i] = ${BIGVAR}.bonkHost.state.discs[i];
 			}
 			if(window.bonkHost.toolFunctions.getGameSettings().mo=='sp') {
-				${stateCreationString}.discs[i].a1a -= 2*30*3;
+				${stateCreationString}.discs[i].a1a -= Math.min(2*30, 2*30 - ${BIGVAR}.bonkHost.state.ftu)*3;
 			}
 		}
 	}
@@ -581,6 +580,7 @@ if(${BIGVAR}.bonkHost.state && window.bonkHost.keepState && window.bonkHost.tool
 	${stateCreationString}.physics=${BIGVAR}.bonkHost.state.physics;
 	${stateCreationString}.seed=${BIGVAR}.bonkHost.state.seed;
 	${stateCreationString}.rc=${BIGVAR}.bonkHost.state.rc;
+	${stateCreationString}.rl=${BIGVAR}.bonkHost.state.rl - Math.min(60, 60 - ${BIGVAR}.bonkHost.state.ftu);
 	${stateCreationString}.ftu=60;
 	${stateCreationString}.shk=${BIGVAR}.bonkHost.state.shk;
 	${stateCreationString}.projectiles=${BIGVAR}.bonkHost.state.projectiles;
