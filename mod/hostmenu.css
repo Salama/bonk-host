@@ -1,16 +1,16 @@
 #hostPlayerMenu {
-	background-color: #cfd8cd;
-	width: calc(35.2vw - 400px);
-	min-width: 154px;
-	max-width: 260px;
-	height: 576px;
-	position: absolute;
-	left: 10px;
-	top: 60px;
-	border-radius: 7px;
-	display: none;
+    background-color: #cfd8cd;
+    width: calc(35.2vw - 400px);
+    min-width: 154px;
+    max-width: 260px;
+    height: 576px;
+    position: absolute;
+    left: 10px;
+    top: 60px;
+    border-radius: 7px;
+    display: none;
     transition: ease-in-out 100ms;
-	z-index: 100;
+    z-index: 100;
 }
 
 #hostPlayerMenuCollapse {
@@ -31,7 +31,7 @@
     height: 26px;
     border-radius: 2px;
     visibility: visible;
-	cursor: grab;
+    cursor: grab;
 }
 
 #hostPlayerMenuControls {
@@ -41,46 +41,46 @@
 }
 
 #hostPlayerCheatDetection {
-	position: absolute;
-	left: 0;
-	top: 0;
-	z-index: -1;
-	background-color: #cfd8cd;
-	width: inherit;
-	min-width: inherit;
-	max-width: inherit;
-	height: inherit;
-	border-radius: 7px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: -1;
+    background-color: #cfd8cd;
+    width: inherit;
+    min-width: inherit;
+    max-width: inherit;
+    height: inherit;
+    border-radius: 7px;
     transition: ease-in-out 100ms;
-	opacity: 70%;
-	visibility: hidden;
+    opacity: 70%;
+    visibility: hidden;
 }
 
 #hostPlayerCheatDetection canvas {
-	background-color: rgb(58, 58, 58);
-	margin-left: 5%;
-	height: 45px;
-	width: 95%;
-	margin-top: 1px;
-	margin-bottom: 1px;
+    background-color: rgb(58, 58, 58);
+    margin-left: 5%;
+    height: 45px;
+    width: 95%;
+    margin-top: 1px;
+    margin-bottom: 1px;
 }
 #selectionWheel {
-	width: 150px;
-	height: 150px;
-	position: absolute;
-	left: 588px;
-	top: 181px;
-	pointer-events: none;
-	display: none;
-	z-index: 150;
+    width: 150px;
+    height: 150px;
+    position: absolute;
+    left: 588px;
+    top: 181px;
+    pointer-events: none;
+    display: none;
+    z-index: 150;
 }
 #selectionWheelTeams {
-	width: 150px;
-	height: 150px;
-	position: absolute;
-	left: 1061px;
-	top: 169px;
-	pointer-events: none;
-	display: none;
-	z-index: 150;
+    width: 150px;
+    height: 150px;
+    position: absolute;
+    left: 1061px;
+    top: 169px;
+    pointer-events: none;
+    display: none;
+    z-index: 150;
 }
