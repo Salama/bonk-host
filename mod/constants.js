@@ -166,6 +166,10 @@ window.bonkHost.wrap = () => {
 			}
 		}
 
+		window.bonkHost.toolFunctions.networkEngine.on("teamLockChange", lock => {
+			document.getElementById("hostPlayerMenuTeamlock").checked = lock;
+		});
+
 		for(const i of Object.keys(window.bonkHost.toolFunctions)) {
 			if(typeof window.bonkHost.toolFunctions[i] !== "function") continue;
 			const ogFunc = window.bonkHost.toolFunctions[i];
@@ -221,6 +225,7 @@ window.bonkHost.wrap = () => {
 						window.bonkHost.menuFunctions.visible = true;
 						window.bonkHost.menuFunctions.updatePlayers();
 						window.bonkHost.playerManagement.show();
+						document.getElementById("hostPlayerMenuTeamlock").checked = window.bonkHost.toolFunctions.getGameSettings().tl;
 						break;
 				}
 				return response;
