@@ -294,6 +294,7 @@ const chatHandler = e => {
 						window.bonkHost.freejoin = false;
 					}
 					window.bonkHost.menuFunctions.showStatusMessage("* Freejoin " + (window.bonkHost.freejoin ? "on" : "off"), "#b53030", false);
+					document.getElementById('hostPlayerMenuFreejoin').checked = window.bonkHost.freejoin;
 				}
 				else if(command == "host") {
 					if(args.length === 0) {
