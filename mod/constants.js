@@ -588,7 +588,12 @@ if(${BIGVAR}.bonkHost.state && window.bonkHost.keepState && window.bonkHost.tool
 	window.bonkHost.keepState=false;
 };
 if(${stateCreationString}.scores.length > 0 && document.getElementById('hostPlayerMenuKeepScores').checked) {
-	${stateCreationString}.scores = ${BIGVAR}.bonkHost.state.scores;
+	if(window.bonkHost.toolFunctions.getGameSettings().ga === "b" && ${BIGVAR}.bonkHost.state !== undefined) {
+		${stateCreationString}.scores = ${BIGVAR}.bonkHost.state.scores;
+	}
+	else if(window.bonkHost.toolFunctions.getGameSettings().ga === "f" && ${BIGVAR}.bonkHost.footballState !== undefined) {
+		${stateCreationString}.scores = ${BIGVAR}.bonkHost.footballState.scores;
+	}
 }
 `;
 
@@ -608,6 +613,13 @@ const STEP_BEGIN = `
 		state.scores = [null, null, ...state.scores.slice(2, 6)];
 	}
 	${BIGVAR}.bonkHost.state = state;
+}
+`;
+
+const FOOTBALL_STEP_BEGIN = `
+{
+	let state = arguments[0];
+	${BIGVAR}.bonkHost.footballState = state;
 }
 `;
 

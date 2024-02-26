@@ -56,6 +56,11 @@ patch(`function ${BIGVAR}(){}`, `function ${BIGVAR}(){}${BIGVAR}.bonkHost={};`);
 const stateRegex = newStr.match(/[A-Z]\[[A-Za-z0-9\$_]{3}(\[[0-9]{1,3}\]){2}\]={discs/)[0];
 patch(stateRegex, STEP_BEGIN + stateRegex);
 
+//Football state
+let footballStateRegex = newStr.match(/=\[\];if\(\![A-Za-z0-9\$_]\[[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\]\[[0-9]{1,3}\]\]\)\{/)[0];
+footballStateRegex = footballStateRegex.split(";");
+patch(footballStateRegex.join(";"), footballStateRegex[0] + ";" + FOOTBALL_STEP_BEGIN + footballStateRegex[1]);
+
 //Apply latest state
 const stateSetRegex = newStr.match(/\* 999\),[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\],null,[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\],true\);/)[0];
 patch(stateSetRegex, stateSetRegex + SET_STATE);
