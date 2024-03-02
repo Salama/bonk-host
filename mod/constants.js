@@ -12,7 +12,7 @@ window.bonkHost.lagginessHistory = [];
 window.bonkHost.fig = 0;
 window.bonkHost.cheatDetection = false;
 
-window.bonkCommands = window.bonkCommands.concat(["/kick", "/mute", "/unmute", "/lock", "/unlock", "/balance", "/fav", "/unfav", "/curate", "/curateyes", "/curateno", "/roomname", "/roompass", "/clearroompass", "/hhelp", "/balanceall", "/start", "/freejoin", "/host", "/ban", "/bans", "/unban", "/resetpos"]);
+window.bonkCommands = window.bonkCommands.concat(["/kick", "/mute", "/unmute", "/lock", "/unlock", "/balance", "/fav", "/unfav", "/curate", "/curateyes", "/curateno", "/roomname", "/roompass", "/clearroompass", "/hhelp", "/balanceall", "/start", "/freejoin", "/host", "/ban", "/bans", "/unban", "/scoreboard", "/resetpos"]);
 
 if(!localStorage.getItem("bonkHost")) {
 	localStorage.setItem("bonkHost", "{}");
@@ -273,6 +273,7 @@ const chatHandler = e => {
 				if(command == "hhelp") {
 					window.bonkHost.menuFunctions.showStatusMessage("/balance * -100 to 100 -- Balances everyone","#b53030",false);
 					window.bonkHost.menuFunctions.showStatusMessage("/balanceall -100 to 100 -- Balances everyone","#b53030",false);
+					window.bonkHost.menuFunctions.showStatusMessage("/scoreboard -- Shows the scoreboard from the last game","#b53030",false);
 					window.bonkHost.menuFunctions.showStatusMessage("/start -- Starts the game","#b53030",false);
 					window.bonkHost.menuFunctions.showStatusMessage("/freejoin on/off -- Lets people join during the game","#b53030",false);
 					window.bonkHost.menuFunctions.showStatusMessage('/host "user name" -- Gives host to the player',"#b53030",false);
@@ -367,6 +368,25 @@ const chatHandler = e => {
 					if (window.bonkHost.menuFunctions) {
 						window.bonkHost.menuFunctions.updateGameSettings();
 						window.bonkHost.menuFunctions.updatePlayers();
+					}
+				}
+				else if(command == "scoreboard") {
+					if(window.bonkHost.toolFunctions.getGameSettings().ga === "b") {
+						const players = document.getElementById("ingamewinner_scores_left").textContent.slice(0, -1).split(":\r\n");
+						const scores = document.getElementById("ingamewinner_scores_right").textContent.split("\r\n");
+						const longestScore = scores.reduce((a, b) => {return a.length > b.length ? a : b}).length;
+						window.bonkHost.menuFunctions.showStatusMessage("* Scoreboard from the last game:", "#b53030", true);
+
+						for(let i = 0; i < players.length; i++) {
+							// \u2007 is a figure space (witdh of one digit)
+							window.bonkHost.menuFunctions.showStatusMessage(`${scores[i].padStart((longestScore), "\u2007")}\t${players[i]}`, "#b53030", false);
+						}
+					}
+					else if(window.bonkHost.toolFunctions.getGameSettings().ga === "f" && window[BIGVAR].bonkHost.footballState) {
+						const scores = window[BIGVAR].bonkHost.footballState.scores.map(s => s.toString());
+						const longestScore = (scores[2].length > scores[3].length ? scores[2] : scores[3]).length;
+						window.bonkHost.menuFunctions.showStatusMessage(`${scores[3].padStart((longestScore), "\u2007")}\tBLUE TEAM`, "#b53030", false);
+						window.bonkHost.menuFunctions.showStatusMessage(`${scores[2].padStart((longestScore), "\u2007")}\tRED TEAM`, "#b53030", false);
 					}
 				}
 				else if(command == "resetpos") {
