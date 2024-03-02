@@ -109,6 +109,10 @@ window.bonkHost.wrap = () => {
 						window.bonkHost.menuFunctions.visible = true;
 						window.bonkHost.playerManagement.canBeVisible = true;
 						window.bonkHost.playerManagement.show();
+						//Intentional fallthrough to update host status
+
+					case "updateGameSettings":
+						window.bonkHost.handleHostChange(window.bonkHost.toolFunctions.networkEngine.hostID === window.bonkHost.toolFunctions.networkEngine.getLSID());
 						break;
 					case "handleHostChange":
 					case "handleHostLeft":
@@ -221,6 +225,7 @@ window.bonkHost.wrap = () => {
 				switch(i) {
 					case "go":
 					case "goInProgress":
+						window.bonkHost.handleHostChange(false);
 						window.bonkHost.playerManagement.canBeVisible = true;
 						window.bonkHost.menuFunctions.visible = true;
 						window.bonkHost.menuFunctions.updatePlayers();
@@ -827,13 +832,8 @@ window.bonkHost.playerManagement.hide = () => {
 }
 
 window.bonkHost.handleHostChange = (host) => {
-	return;
-	if(host) {
-		window.bonkHost.playerManagement.show();
-	}
-	else {
-		window.bonkHost.playerManagement.hide();
-	}
+	document.getElementById("hostPlayerMenuRestartButton").classList.toggle("brownButtonDisabled", !host);
+	document.getElementById("hostPlayerMenuTeamlock").classList.toggle("brownButtonDisabled", !host);
 }
 
 window.bonkHost.playerManagement.collapse = (saveToLocalStorage = true) => {
