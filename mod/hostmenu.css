@@ -91,3 +91,8 @@
     display: none;
     z-index: 150;
 }
+
+#hostPlayerMenuRestartButton {
+    width: 100%;
+    border-width: 0 !important;
+}
