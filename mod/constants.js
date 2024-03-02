@@ -624,6 +624,9 @@ const STEP_BEGIN = `
 			updatePlayers = true;
 		}
 	}
+	else {
+		updatePlayers = true;
+	}
 	${BIGVAR}.bonkHost.state = state;
 	if(updatePlayers) {
 		window.bonkHost.menuFunctions.updatePlayers();
@@ -639,6 +642,9 @@ const FOOTBALL_STEP_BEGIN = `
 		if(document.getElementById("gamerenderer").style.visibility === "inherit" && ${BIGVAR}.bonkHost.footballState.players.map(p => p?.team).join() != state.players.map(p => p?.team).join()) {
 			updatePlayers = true;
 		}
+	}
+	else {
+		updatePlayers = true;
 	}
 	${BIGVAR}.bonkHost.footballState = state;
 	if(updatePlayers) {
@@ -760,8 +766,8 @@ window.bonkHost.playerManagement.addPlayer = (playerEntry) => {
 	// Make spectators transparent
 	let playerId = window.bonkHost.players.findIndex(p => p && (p.userName === newPlayerEntry.childNodes[1].textContent));
 	if(
-		!(window.bonkHost.toolFunctions.getGameSettings().ga === "b" && window[BIGVAR].bonkHost.state.players[playerId]) &&
-		!(window.bonkHost.toolFunctions.getGameSettings().ga === "f" && window[BIGVAR].bonkHost.footballState.players[playerId])
+		!(window.bonkHost.toolFunctions.getGameSettings().ga === "b" && window[BIGVAR].bonkHost.state?.players[playerId]) &&
+		!(window.bonkHost.toolFunctions.getGameSettings().ga === "f" && window[BIGVAR].bonkHost.footballState?.players[playerId])
 	) {
 		newPlayerEntry.style.filter = "opacity(0.4)";
 	}
