@@ -609,23 +609,41 @@ const STEP_BEGIN = `
 {
 	let state = arguments[0];
 	let gs = arguments[4];
-	if(gs.tea) {
-		let teams = state.players.filter(p=>p).map(p=>p.team);
-		for(let i = 2; i < 7; i++) {
-			if(state.scores[i] && state.scores[i] === 0 && !teams.includes(i)) {
-				state.scores[i] = null;
+	let updatePlayers = false;
+	if(${BIGVAR}.bonkHost.state !== undefined) {
+		if(gs.tea) {
+			let teams = state.players.filter(p=>p).map(p=>p.team);
+			for(let i = 2; i < 7; i++) {
+				if(state.scores[i] && state.scores[i] === 0 && !teams.includes(i)) {
+					state.scores[i] = null;
+				}
 			}
+			state.scores = [null, null, ...state.scores.slice(2, 6)];
 		}
-		state.scores = [null, null, ...state.scores.slice(2, 6)];
+		if(document.getElementById("gamerenderer").style.visibility === "inherit" && ${BIGVAR}.bonkHost.state.players.map(p => p?.team).join() != state.players.map(p => p?.team).join()) {
+			updatePlayers = true;
+		}
 	}
 	${BIGVAR}.bonkHost.state = state;
+	if(updatePlayers) {
+		window.bonkHost.menuFunctions.updatePlayers();
+	}
 }
 `;
 
 const FOOTBALL_STEP_BEGIN = `
 {
 	let state = arguments[0];
+	let updatePlayers = false;
+	if(${BIGVAR}.bonkHost.footballState !== undefined) {
+		if(document.getElementById("gamerenderer").style.visibility === "inherit" && ${BIGVAR}.bonkHost.footballState.players.map(p => p?.team).join() != state.players.map(p => p?.team).join()) {
+			updatePlayers = true;
+		}
+	}
 	${BIGVAR}.bonkHost.footballState = state;
+	if(updatePlayers) {
+		window.bonkHost.menuFunctions.updatePlayers();
+	}
 }
 `;
 
@@ -738,23 +756,16 @@ window.bonkHost.playerManagement.addPlayer = (playerEntry) => {
 		menu.style.top=([...playerEntry.parentNode.children].indexOf(playerEntry))*43+"px";
 	}
 	newPlayerEntry.onmouseenter = playerEntry.onmouseenter;
-	info = window.bonkHost.players.filter(p=>p).find(p => p.userName === newPlayerEntry.childNodes[1].textContent);
+
+	// Make spectators transparent
+	let playerId = window.bonkHost.players.findIndex(p => p && (p.userName === newPlayerEntry.childNodes[1].textContent));
 	if(
-		info.team === 0 ||
-		(window.bonkHost.toolFunctions.getGameSettings().tea && info.team === 1) ||
-		(window.bonkHost.toolFunctions.getGameSettings().tea && info.team > 1) ||
-		(
-			!window.bonkHost.freejoin &&
-			window.bonkHost.playerManagement.canBeVisible &&
-			window.bonkHost.inGame &&
-			!(
-				window[BIGVAR].bonkHost.state.discs[window.bonkHost.players.findIndex(i => {return i && i.userName === newPlayerEntry.children[1].textContent})] === undefined &&
-				window[BIGVAR].bonkHost.state.discDeaths.findIndex(i => {return i.i === window.bonkHost.players.findIndex(i => {return i && i.userName === newPlayerEntry.children[1].textContent})}) === -1
-			)
-		)
+		!(window.bonkHost.toolFunctions.getGameSettings().ga === "b" && window[BIGVAR].bonkHost.state.players[playerId]) &&
+		!(window.bonkHost.toolFunctions.getGameSettings().ga === "f" && window[BIGVAR].bonkHost.footballState.players[playerId])
 	) {
 		newPlayerEntry.style.filter = "opacity(0.4)";
 	}
+
 	// Listen for skin render
 	let observer = new MutationObserver((mutations) => {
 		mutations.forEach((mutation) => {
