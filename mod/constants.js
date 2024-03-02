@@ -93,6 +93,7 @@ window.bonkHost.wrap = () => {
 			window.bonkHost.menuFunctions[i] = function() {
 				let response = ogFunc.apply(window.bonkHost.menuFunctions, arguments);
 				switch(i) {
+					case "returnFromTesting":
 					case "show":
 						window.bonkHost.playerManagement.canBeVisible = false;
 						window.bonkHost.playerManagement.hide();
