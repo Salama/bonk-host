@@ -175,6 +175,18 @@ window.bonkHost.wrap = () => {
 			document.getElementById("hostPlayerMenuTeamlock").checked = lock;
 		});
 
+		let mapUpdateTimeout;
+		window.bonkHost.toolFunctions.networkEngine.on("status", code => {
+			if(code === "rate_limit_sma") {
+				// A second of delay is hopefully enough. This is needed because map history can easily get ratelimited, so we want to update players with the current map before the game begins.
+				clearTimeout(mapUpdateTimeout);
+				mapUpdateTimeout = setTimeout(() => {
+					if(!isHost()) return;
+					window.bonkHost.toolFunctions.networkEngine.sendMapAdd(window.bonkHost.toolFunctions.getGameSettings().map);
+				}, 1000);
+			}
+		});
+
 		for(const i of Object.keys(window.bonkHost.toolFunctions)) {
 			if(typeof window.bonkHost.toolFunctions[i] !== "function") continue;
 			const ogFunc = window.bonkHost.toolFunctions[i];
