@@ -1147,8 +1147,17 @@ document.getElementById("ingamechatinputtext").addEventListener("keydown", autoc
 	let oldAngle = null;
 	const innerWheelRadius = (wheelSize/26.458)/2*8.5;
 	window.bonkHost.updatePlayers = () => {
-		if(!isHost()) return;
-		[...document.getElementsByClassName("newbonklobby_playerentry")].filter(e => {return ["newbonklobby_playerbox_leftelementcontainer", "newbonklobby_playerbox_rightelementcontainer", "newbonklobby_playerbox_elementcontainer", "newbonklobby_specbox_elementcontainer", "hostPlayerMenuBox"].includes(e.parentNode.id)}).forEach(e => {
+		[...document.getElementsByClassName("newbonklobby_playerentry")].filter(e => {
+			return ["newbonklobby_playerbox_leftelementcontainer",
+					"newbonklobby_playerbox_rightelementcontainer",
+					"newbonklobby_playerbox_elementcontainer",
+					"newbonklobby_specbox_elementcontainer",
+					"hostPlayerMenuBox"].includes(e.parentNode.id) &&
+				(
+					isHost() ||
+					e.children[1].textContent === window.bonkHost.players[window.bonkHost.toolFunctions.networkEngine.getLSID()].userName
+				)
+		}).forEach(e => {
 			e.addEventListener("mousedown", mouse => {
 				selectedPlayer = e;
 				start = [mouse.clientY, mouse.clientX];
@@ -1216,12 +1225,20 @@ document.getElementById("ingamechatinputtext").addEventListener("keydown", autoc
 		if(!selectedPlayer) return;
 		document.body.style.removeProperty("pointer-events");
 		end = [mouse.clientY, mouse.clientX];
+		const sendTeamChange = (i, team) => {
+			if(i == window.bonkHost.toolFunctions.networkEngine.getLSID()) {
+				window.bonkHost.toolFunctions.networkEngine.changeOwnTeam(team);
+			}
+			else {
+				window.bonkHost.toolFunctions.networkEngine.changeOtherTeam(i, team);
+			}
+		}
 		if(Math.sqrt((end[0]-start[0])**2 + (end[1]-start[1])**2) >= innerWheelRadius) {
 			if(!window.bonkHost.toolFunctions.getGameSettings().tea) {
 			for(let child of [...document.getElementById("selectionWheel").children[0].children]) {
 				child.children[0].style.opacity = 0.5;
 			}
-			window.bonkHost.toolFunctions.networkEngine.changeOtherTeam(window.bonkHost.players.findIndex(i => {return i && i.userName === selectedPlayer.children[1].textContent}), end[1]<start[1] ? 1 : 0);
+			sendTeamChange(window.bonkHost.players.findIndex(i => {return i && i.userName === selectedPlayer.children[1].textContent}), end[1]<start[1] ? 1 : 0);
 			}
 			else {
 				let angle = Math.atan((end[0]-start[0])/(end[1]-start[1]))/Math.PI*180+360/5/2;
@@ -1232,7 +1249,7 @@ document.getElementById("ingamechatinputtext").addEventListener("keydown", autoc
 					angle += 360;
 				}
 				angle = Math.floor((angle%360)/(360/5));
-				window.bonkHost.toolFunctions.networkEngine.changeOtherTeam(window.bonkHost.players.findIndex(i => {return i && i.userName === selectedPlayer.children[1].textContent}), [0, 5, 4, 3, 2][angle]);
+				sendTeamChange(window.bonkHost.players.findIndex(i => {return i && i.userName === selectedPlayer.children[1].textContent}), [0, 5, 4, 3, 2][angle]);
 			}
 		}
 		else {
@@ -1241,5 +1258,10 @@ document.getElementById("ingamechatinputtext").addEventListener("keydown", autoc
 		selectedPlayer = null;
 	}
 	document.addEventListener("mouseup", changeTeam);
-	document.addEventListener("mouseenter", mouse => {selectedPlayer = (mouse.buttons !== 0 ? selectedPlayer : null); if(!selectedPlayer)changeTeam(mouse)});
+	document.addEventListener("mouseenter", mouse => {
+		let selectedPlayer = (mouse.buttons !== 0 ? selectedPlayer : null);
+		if(!selectedPlayer) {
+			changeTeam(mouse);
+		}
+	});
 })();
