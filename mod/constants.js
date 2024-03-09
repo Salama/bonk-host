@@ -6,9 +6,7 @@ window.bonkHost.inGame = false;
 window.bonkHost.playerManagement.canBeVisible = false;
 window.bonkHost.bonkCallbacks = {};
 window.bonkHost.playerHistory = {};
-window.bonkHost.cheatWarning = [];
-window.bonkHost.lagHistory = [];
-window.bonkHost.lagginessHistory = [];
+window.bonkHost.playerSus = [];
 window.bonkHost.fig = 0;
 window.bonkHost.cheatDetection = false;
 let mapHistory = [];
@@ -209,9 +207,7 @@ window.bonkHost.wrap = () => {
 						break;
 					case "destroy":
 						window.bonkHost.playerManagement.hide();
-						window.bonkHost.cheatWarning = [];
-						window.bonkHost.lagHistory = [];
-						window.bonkHost.lagginessHistory = [];
+						window.bonkHost.playerSus = [];
 						break;
 				}
 				return response;
@@ -244,31 +240,41 @@ window.bonkHost.wrap = () => {
 						if(arguments[2] !== "node") break;
 						let playerId = arguments[0];
 						let packet = arguments[1];
-						if(packet.type === "commands") {
-							window.bonkHost.cheatWarning[playerId] = true;
+
+						if(!window.bonkHost.playerSus[playerId]) {
+							window.bonkHost.playerSus[playerId] = {
+								lagHistory: [],
+								lagginessHistory: [],
+								cheatWarning: false
+							}
 						}
+
+						if(packet.type === "commands") {
+							window.bonkHost.playerSus[playerId].cheatWarning = true;
+						}
+
 						if(window.bonkHost.cheatDetection) {
 							let ping = (window.bonkHost.players[playerId].ping + window.bonkHost.players[window.bonkHost.toolFunctions.networkEngine.getLSID()].ping) / 2;
 
 							if(isNaN(packet.f - window.bonkHost.fig)) {
 								return;
 							}
-							if(!window.bonkHost.lagHistory[playerId]) window.bonkHost.lagHistory[playerId] = [];
-							if(!window.bonkHost.lagginessHistory[playerId]) window.bonkHost.lagginessHistory[playerId] = [];
-							window.bonkHost.lagHistory[playerId].push(Math.floor(1000*(1/30)*(packet.f - window.bonkHost.fig)) + ping);
-							if(window.bonkHost.lagHistory[playerId].length > 20) {
-								window.bonkHost.lagHistory[playerId].shift();
+
+							window.bonkHost.playerSus[playerId].lagHistory.push(Math.floor(1000*(1/30)*(packet.f - window.bonkHost.fig)) + ping);
+							if(window.bonkHost.playerSus[playerId].lagHistory.length > 20) {
+								window.bonkHost.playerSus[playerId].lagHistory.shift();
 							}
 
-							let avgPingDiff = (window.bonkHost.lagHistory[playerId].length > 2) ?
+							let avgPingDiff = (window.bonkHost.playerSus[playerId].lagHistory.length > 2) ?
 								((
-									window.bonkHost.lagHistory[playerId].reduce((a, b) => a+b) -
-									Math.max.apply(Math, window.bonkHost.lagHistory[playerId]) -
-									Math.min.apply(Math, window.bonkHost.lagHistory[playerId])
-								) / window.bonkHost.lagHistory[playerId].length - 2) : 0
+									window.bonkHost.playerSus[playerId].lagHistory.reduce((a, b) => a+b) -
+									Math.max.apply(Math, window.bonkHost.playerSus[playerId].lagHistory) -
+									Math.min.apply(Math, window.bonkHost.playerSus[playerId].lagHistory)
+								) / window.bonkHost.playerSus[playerId].lagHistory.length - 2) : 0
 
 							if(isNaN(avgPingDiff)) return;
-							window.bonkHost.lagginessHistory[playerId].push(avgPingDiff);
+							window.bonkHost.playerSus[playerId].lagginessHistory.push(avgPingDiff);
+
 							window.bonkHost.drawLagginess(playerId);
 						}
 						break;
@@ -539,24 +545,25 @@ let modeStuff = newStr.match(/[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\]=class [A-Za-z0-9\$
 let modesObject =`${modeStuff}.modes`;
 
 window.bonkHost.drawLagginess = (playerId) => {
-	if(window.bonkHost.lagginessHistory[playerId] === undefined || !window.bonkHost.players[playerId] || window.bonkHost.toolFunctions.networkEngine.getLSID() === playerId) return false;
+	if(!window.bonkHost.playerSus[playerId] || !window.bonkHost.playerSus[playerId].lagginessHistory || !window.bonkHost.players[playerId] || window.bonkHost.toolFunctions.networkEngine.getLSID() === playerId) return false;
 	let graph = document.getElementById("hostPlayerMenuCheatBox").children[window.bonkHost.players.filter(p=>p).indexOf(window.bonkHost.players[playerId])];
 	if(graph.width !== graph.clientWidth && document.getElementById('hostPlayerMenu').style.visibility != "hidden") {
 		graph.width = graph.clientWidth;
 	}
-	while (window.bonkHost.lagginessHistory[playerId].length > graph.clientWidth) {
-		window.bonkHost.lagginessHistory[playerId].shift();
+	while (window.bonkHost.playerSus[playerId].lagginessHistory.length > Math.max(graph.clientWidth, 300)) {
+		window.bonkHost.playerSus[playerId].lagginessHistory.shift();
 	}
 	let ctx = graph.getContext("2d");
 	ctx.scale(1, -1);
 	ctx.beginPath();
 	ctx.clearRect(0, 0, graph.width, graph.height);
 	ctx.strokeStyle = "#0f0";
-	let max = Math.max(0, Math.max.apply(Math, window.bonkHost.lagginessHistory[playerId]));
-	let min = Math.min(-60, Math.min.apply(Math, window.bonkHost.lagginessHistory[playerId])) - max;
-	ctx.moveTo(0, (window.bonkHost.lagginessHistory[playerId][0] - max) / min * graph.height);
-	for(let i = 1; i < window.bonkHost.lagginessHistory[playerId].length; i++) {
-		ctx.lineTo(i, (window.bonkHost.lagginessHistory[playerId][i] - max) / min * graph.height);
+	let lagginessHistory = window.bonkHost.playerSus[playerId].lagginessHistory.slice(-graph.clientWidth);
+	let max = Math.max(0, Math.max.apply(Math, lagginessHistory));
+	let min = Math.min(-60, Math.min.apply(Math, lagginessHistory)) - max;
+	ctx.moveTo(0, (lagginessHistory[0] - max) / min * graph.height);
+	for(let i = 1; i < lagginessHistory.length; i++) {
+		ctx.lineTo(i, (lagginessHistory[i] - max) / min * graph.height);
 	}
 	ctx.stroke();
 	for(let i = 1; i < 11; i++) {
@@ -571,11 +578,11 @@ window.bonkHost.drawLagginess = (playerId) => {
 			break;
 		}
 	}
-	if(window.bonkHost.cheatWarning[playerId]) {
+	if(window.bonkHost.playerSus[playerId].cheatWarning) {
 		ctx.font = "16px monospace";
 		ctx.fillText("⚠️", 0, 16);
 	}
-	if(window.bonkHost.lagginessHistory[playerId] === undefined || !window.bonkHost.players[playerId] || window.bonkHost.toolFunctions.networkEngine.getLSID() === playerId) {
+	if(window.bonkHost.playerSus[playerId].lagginessHistory === undefined || !window.bonkHost.players[playerId] || window.bonkHost.toolFunctions.networkEngine.getLSID() === playerId) {
 		ctx.clearRect(0, 0, graph.width, graph.height);
 	}
 	return true;
