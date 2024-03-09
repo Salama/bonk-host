@@ -94,9 +94,6 @@ document.getElementById("newbonklobby_hostnextmap").addEventListener("click", ()
 	updateMapHistoryButtons();
 });
 
-document.getElementById("newbonklobby_roundsinput").style.height = "50px";
-document.getElementById("newbonklobby_roundsinput").style.textAlign = "center";
-
 document.getElementById("newbonklobby_roundsinput").addEventListener("focus", e => {
 	e.target.value = "";
 });
