@@ -96,3 +96,19 @@
     width: 100%;
     border-width: 0 !important;
 }
+
+#newbonklobby_hostprevmap {
+    width: 27px;
+    height: 27px;
+    position: absolute;
+    top: 106px;
+    left: 15px;
+}
+
+#newbonklobby_hostnextmap {
+    width: 27px;
+    height: 27px;
+    position: absolute;
+    top: 106px;
+    left: 48px;
+}

@@ -11,6 +11,8 @@ window.bonkHost.lagHistory = [];
 window.bonkHost.lagginessHistory = [];
 window.bonkHost.fig = 0;
 window.bonkHost.cheatDetection = false;
+let mapHistory = [];
+let mapHistoryIndex = 0;
 
 window.bonkCommands = window.bonkCommands.concat(["/kick", "/mute", "/unmute", "/lock", "/unlock", "/balance", "/fav", "/unfav", "/curate", "/curateyes", "/curateno", "/roomname", "/roompass", "/clearroompass", "/hhelp", "/balanceall", "/start", "/freejoin", "/host", "/ban", "/bans", "/unban", "/scoreboard", "/resetpos"]);
 
@@ -51,6 +53,46 @@ document.getElementById("newbonklobby_bluebutton").addEventListener("dblclick", 
 document.getElementById("newbonklobby_redbutton").addEventListener("dblclick", () => {moveEveryone(2)});
 document.getElementById("newbonklobby_greenbutton").addEventListener("dblclick", () => {moveEveryone(4)});
 document.getElementById("newbonklobby_yellowbutton").addEventListener("dblclick", () => {moveEveryone(5)});
+
+document.getElementById("newbonklobby_settingsbox").appendChild(document.getElementById("newbonklobby_hostprevmap"));
+document.getElementById("newbonklobby_settingsbox").appendChild(document.getElementById("newbonklobby_hostnextmap"));
+
+const updateMapHistoryButtons = () => {
+	if(isHost()) {
+		document.getElementById("newbonklobby_hostprevmap").classList.toggle("brownButtonDisabled", mapHistoryIndex >= mapHistory.length - 1);
+		document.getElementById("newbonklobby_hostnextmap").classList.toggle("brownButtonDisabled", mapHistoryIndex === 0);
+
+		// Make sure they are the topmost elements
+		document.getElementById("newbonklobby_settingsbox").appendChild(document.getElementById("newbonklobby_hostprevmap"));
+		document.getElementById("newbonklobby_settingsbox").appendChild(document.getElementById("newbonklobby_hostnextmap"));
+	}
+	else {
+		document.getElementById("newbonklobby_hostprevmap").classList.add("brownButtonDisabled");
+		document.getElementById("newbonklobby_hostnextmap").classList.add("brownButtonDisabled");
+	}
+}
+
+document.getElementById("newbonklobby_hostprevmap").addEventListener("click", () => {
+	if(!isHost() || mapHistoryIndex >= mapHistory.length - 1) return;
+	mapHistoryIndex++;
+	let gs = window.bonkHost.toolFunctions.getGameSettings();
+	gs.map = mapHistory[mapHistoryIndex];
+	window.bonkHost.menuFunctions.setGameSettings(gs);
+	window.bonkHost.menuFunctions.updateGameSettings();
+	window.bonkHost.toolFunctions.networkEngine.sendMapAdd(gs.map);
+	updateMapHistoryButtons();
+});
+
+document.getElementById("newbonklobby_hostnextmap").addEventListener("click", () => {
+	if(!isHost() || mapHistoryIndex == 0) return;
+	mapHistoryIndex--;
+	let gs = window.bonkHost.toolFunctions.getGameSettings();
+	gs.map = mapHistory[mapHistoryIndex];
+	window.bonkHost.menuFunctions.setGameSettings(gs);
+	window.bonkHost.menuFunctions.updateGameSettings();
+	window.bonkHost.toolFunctions.networkEngine.sendMapAdd(gs.map);
+	updateMapHistoryButtons();
+});
 
 document.getElementById("newbonklobby_roundsinput").style.height = "50px";
 document.getElementById("newbonklobby_roundsinput").style.textAlign = "center";
@@ -159,6 +201,14 @@ window.bonkHost.wrap = () => {
 						break;
 					case "changeOwnTeam":
 						window.bonkHost.playerManagement.movePlayer(arguments[0]);
+						break;
+					case "sendMapAdd":
+						if(arguments[0].m.dbid !== mapHistory[mapHistoryIndex]?.m.dbid || arguments[0].m.dbv !== mapHistory[mapHistoryIndex]?.m.dbv) {
+							mapHistory.splice(0, mapHistoryIndex);
+							mapHistoryIndex = 0;
+							mapHistory.unshift(arguments[0]);
+						}
+						updateMapHistoryButtons();
 						break;
 					case "destroy":
 						window.bonkHost.playerManagement.hide();
@@ -864,9 +914,15 @@ window.bonkHost.playerManagement.hide = () => {
 		parent.document.getElementById('adboxverticalleftCurse').style.removeProperty("display");
 }
 
+// Can be called in other situations too
 window.bonkHost.handleHostChange = (host) => {
 	document.getElementById("hostPlayerMenuRestartButton").classList.toggle("brownButtonDisabled", !host);
 	document.getElementById("hostPlayerMenuTeamlock").classList.toggle("brownButtonDisabled", !host);
+	updateMapHistoryButtons();
+	if(!host) {
+		mapHistory = [];
+		mapHistoryIndex = 0;
+	}
 }
 
 window.bonkHost.playerManagement.collapse = (saveToLocalStorage = true) => {
