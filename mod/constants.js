@@ -728,7 +728,7 @@ const STEP_BEGIN = `
 		updatePlayers = true;
 	}
 	${BIGVAR}.bonkHost.state = state;
-	if(updatePlayers && !window.bonkHost.toolFunctions.getGameSettings().q) {
+	if(updatePlayers && window.bonkHost.inGame && !window.bonkHost.toolFunctions.getGameSettings().q) {
 		window.bonkHost.menuFunctions.updatePlayers();
 	}
 }
