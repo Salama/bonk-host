@@ -1232,16 +1232,19 @@ document.getElementById("ingamechatinputtext").addEventListener("keydown", autoc
 					"newbonklobby_playerbox_rightelementcontainer",
 					"newbonklobby_playerbox_elementcontainer",
 					"newbonklobby_specbox_elementcontainer",
-					"hostPlayerMenuBox"].includes(e.parentNode.id) &&
-				(
-					isHost() ||
-					e.children[1].textContent === window.bonkHost.players[window.bonkHost.toolFunctions.networkEngine.getLSID()].userName
-				)
+					"hostPlayerMenuBox"].includes(e.parentNode.id);
 		}).forEach(e => {
 			e.addEventListener("mousedown", mouse => {
-				selectedPlayer = e;
-				start = [mouse.clientY, mouse.clientX];
+				if(isHost() || (e.children[1].textContent === window.bonkHost.players[window.bonkHost.toolFunctions.networkEngine.getLSID()].userName && !window.bonkHost.inGame)) {
+					selectedPlayer = e;
+					start = [mouse.clientY, mouse.clientX];
+				}
 			});
+			e.addEventListener("click", mouse => {
+				if(!isHost() && e.children[1].textContent === window.bonkHost.players[window.bonkHost.toolFunctions.networkEngine.getLSID()].userName && window.bonkHost.inGame) {
+					mouse.stopImmediatePropagation();
+				}
+			}, true);
 		});
 	}
 	document.addEventListener("mousemove", mouse => {
