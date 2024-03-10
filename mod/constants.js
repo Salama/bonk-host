@@ -56,17 +56,25 @@ document.getElementById("newbonklobby_settingsbox").appendChild(document.getElem
 document.getElementById("newbonklobby_settingsbox").appendChild(document.getElementById("newbonklobby_hostnextmap"));
 
 const updateMapHistoryButtons = () => {
-	if(isHost()) {
-		document.getElementById("newbonklobby_hostprevmap").classList.toggle("brownButtonDisabled", mapHistoryIndex >= mapHistory.length - 1);
-		document.getElementById("newbonklobby_hostnextmap").classList.toggle("brownButtonDisabled", mapHistoryIndex === 0);
+	if(window.bonkHost.toolFunctions.getGameSettings().ga === "b") {
+		document.getElementById("newbonklobby_hostprevmap").style.display = "";
+		document.getElementById("newbonklobby_hostnextmap").style.display = "";
+		if(isHost()) {
+			document.getElementById("newbonklobby_hostprevmap").classList.toggle("brownButtonDisabled", mapHistoryIndex >= mapHistory.length - 1);
+			document.getElementById("newbonklobby_hostnextmap").classList.toggle("brownButtonDisabled", mapHistoryIndex === 0);
 
-		// Make sure they are the topmost elements
-		document.getElementById("newbonklobby_settingsbox").appendChild(document.getElementById("newbonklobby_hostprevmap"));
-		document.getElementById("newbonklobby_settingsbox").appendChild(document.getElementById("newbonklobby_hostnextmap"));
+			// Make sure they are the topmost elements
+			document.getElementById("newbonklobby_settingsbox").appendChild(document.getElementById("newbonklobby_hostprevmap"));
+			document.getElementById("newbonklobby_settingsbox").appendChild(document.getElementById("newbonklobby_hostnextmap"));
+		}
+		else {
+			document.getElementById("newbonklobby_hostprevmap").classList.add("brownButtonDisabled");
+			document.getElementById("newbonklobby_hostnextmap").classList.add("brownButtonDisabled");
+		}
 	}
 	else {
-		document.getElementById("newbonklobby_hostprevmap").classList.add("brownButtonDisabled");
-		document.getElementById("newbonklobby_hostnextmap").classList.add("brownButtonDisabled");
+		document.getElementById("newbonklobby_hostprevmap").style.display = "none";
+		document.getElementById("newbonklobby_hostnextmap").style.display = "none";
 	}
 }
 
