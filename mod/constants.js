@@ -1112,7 +1112,7 @@ let mapSelectionObserver = new MutationObserver(mutations => {
 	for(let mutation of mutations) {
 		for(let e of mutation.addedNodes) {
 			let mode = e.getElementsByClassName('maploadwindowtextmode')[0];
-			if(mode === undefined) mode = e.relatedNode.getElementsByClassName('maploadwindowtextmode_picks')[0];
+			if(mode === undefined) mode = e.getElementsByClassName('maploadwindowtextmode_picks')[0];
 			if(mode === undefined) return;
 			if(mode.textContent !== "Any Mode") {
 				mode.classList.add('brownButton');
