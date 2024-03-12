@@ -161,6 +161,10 @@ window.bonkHost.wrap = () => {
 						window.bonkHost.handleHostChange(window.bonkHost.toolFunctions.networkEngine.hostID === window.bonkHost.toolFunctions.networkEngine.getLSID());
 						break;
 					case "handleHostChange":
+						if(isHost()) {
+							window.bonkHost.stateFunctions.chatStatus("* You are now the host of this game")
+						}
+						//Intentional fallthrough to update host status
 					case "handleHostLeft":
 						window.bonkHost.handleHostChange(arguments[1] === window.bonkHost.toolFunctions.networkEngine.getLSID());
 						break;
