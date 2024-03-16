@@ -661,7 +661,14 @@ let stateCreation = newStr.match(`[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\]=[A-Za-z0-9\$_]
 stateCreationString = stateCreation.split(']')[0] + "]";
 
 const SET_STATE = `
-if(${BIGVAR}.bonkHost.state && window.bonkHost.keepState && window.bonkHost.toolFunctions.getGameSettings().map.s.re && window.bonkHost.toolFunctions.getGameSettings().ga === "b") {
+if (
+	${BIGVAR}.bonkHost.state &&
+	window.bonkHost.keepState &&
+	window.bonkHost.toolFunctions.getGameSettings().map.s.re &&
+	window.bonkHost.toolFunctions.getGameSettings().ga === "b" &&
+	${BIGVAR}.bonkHost.state.mm.dbid == window.bonkHost.toolFunctions.getGameSettings().map.m.dbid &&
+	${BIGVAR}.bonkHost.state.mm.dbv == window.bonkHost.toolFunctions.getGameSettings().map.m.dbv
+	) {
 	for(let i = 0; i < ${BIGVAR}.bonkHost.state.discs.length; i++) {
 		if(${BIGVAR}.bonkHost.state.discs[i] != undefined) {
 			if(${BIGVAR}.bonkHost.state.discs[i].team !== window.bonkHost.players[i].team) {
