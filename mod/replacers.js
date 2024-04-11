@@ -53,7 +53,7 @@ patch(`function ${BIGVAR}(){}`, `function ${BIGVAR}(){}${BIGVAR}.bonkHost={};`);
 /////////////
 
 //Save latest state
-const stateRegex = newStr.match(/[A-Z]\[[A-Za-z0-9\$_]{3}(\[[0-9]{1,3}\]){2}\]={discs/)[0];
+const stateRegex = newStr.match(/[A-Za-z]\[[A-Za-z0-9\$_]{3}(\[[0-9]{1,3}\]){2}\]={discs/)[0];
 patch(stateRegex, STEP_BEGIN + stateRegex);
 
 //Football state

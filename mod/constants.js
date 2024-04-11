@@ -654,7 +654,7 @@ window.bonkHost.createModeDropdown = () => {
 	document.getElementById("newbonklobby_settingsbox").appendChild(dropdown);
 };
 
-let stateCreationString = newStr.match(/[A-Z]\[...(\[[0-9]{1,4}\]){2}\]\(\[\{/)[0];
+let stateCreationString = newStr.match(/[A-Za-z]\[...(\[[0-9]{1,4}\]){2}\]\(\[\{/)[0];
 let stateCreationStringIndex = stateCreationString.match(/[0-9]{1,4}/g);
 stateCreationStringIndex = stateCreationStringIndex[stateCreationStringIndex.length - 1];
 let stateCreation = newStr.match(`[A-Za-z0-9\$_]{3}\[[0-9]{1,3}\]=[A-Za-z0-9\$_]{3}\\[[0-9]{1,4}\\]\\[[A-Za-z0-9\$_]{3}\\[[0-9]{1,4}\\]\\[${stateCreationStringIndex}\\]\\].+?(?=;);`)[0];
