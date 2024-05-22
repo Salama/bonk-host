@@ -377,7 +377,7 @@ const chatHandler = e => {
 					else if(["false", "off", "no", "disable"].includes(args[0])) {
 						window.bonkHost.freejoin = false;
 					}
-					window.bonkHost.menuFunctions.showStatusMessage("* Freejoin " + (window.bonkHost.freejoin ? "on" : "off"), "#b53030", false);
+					window.bonkHost.menuFunctions.showStatusMessage("* Freejoin " + (window.bonkHost.freejoin ? "on" : "off"), "#b53030", true);
 					document.getElementById('hostPlayerMenuFreejoin').checked = window.bonkHost.freejoin;
 				}
 				else if(command == "host") {
@@ -794,11 +794,15 @@ window.bonkHost.handlePlayerJoined = (playerID, playerName, guest) => {
 	if(window.bonkHost.freejoin) {
 		let team = 1;
 		if(window.bonkHost.toolFunctions.getGameSettings().tea) {
-			let teams = window.bonkHost.players.slice(0, -1).filter(p=>p && p.team > 1).map(p=>p.team);
-			if(teams.every(t=>t==teams[0])) {
-				team = teams[0];
+			const teamOption = document.getElementById("hostPlayerMenuFreejoinOption").value;
+			team = [null, null, "Red", "Blue", "Yellow", "Green"].indexOf(teamOption);
+			if(team === -1) {
+				let teams = window.bonkHost.players.slice(0, -1).filter(p=>p && p.team > 1).map(p=>p.team);
+				if(teams.every(t=>t==teams[0])) {
+					team = teams[0];
+				}
+				else return;
 			}
-			else return;
 		}
 		window.bonkHost.stateFunctions.hostHandlePlayerJoined(playerID, window.bonkHost.players.length, team);
 	}
@@ -914,6 +918,9 @@ window.bonkHost.playerManagement.removePlayer = (playerEntry) => {
 }
 
 window.bonkHost.playerManagement.show = () => {
+	const teams = window.bonkHost.toolFunctions.getGameSettings().tea
+	document.getElementById("hostPlayerMenuFreejoinOption").style.display = teams ? "" : "none";
+
 	if(!window.bonkHost.playerManagement.canBeVisible || document.getElementById("gamerenderer").style.visibility != "inherit") return;
 	if(parent.document.getElementById('adboxverticalleftCurse') != null)
 		parent.document.getElementById('adboxverticalleftCurse').style.display = "none";
@@ -1068,6 +1075,9 @@ window.bonkHost.playerManagement.movePlayer = (team, playerID = window.bonkHost.
 }
 
 window.bonkHost.startGame = () => {
+	const teams = window.bonkHost.toolFunctions.getGameSettings().tea
+	document.getElementById("hostPlayerMenuFreejoinOption").style.display = teams ? "" : "none";
+
 	window.bonkHost.keepState = document.getElementById("hostPlayerMenuKeepPositions").checked;
 	for(let callback of Object.keys(window.bonkHost.bonkCallbacks)) {
     	window.bonkHost.bonkCallbacks[callback]("startGame");
