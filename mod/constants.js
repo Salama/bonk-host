@@ -676,7 +676,7 @@ if (
 				${stateCreationString}.discs[i] = ${BIGVAR}.bonkHost.state.discs[i];
 				${stateCreationString}.discs[i].sx = discInfo.sx;
 				${stateCreationString}.discs[i].sy = discInfo.sy;
-				${stateCreationString}.discs[i].sxv = discInfo.svx;
+				${stateCreationString}.discs[i].sxv = discInfo.sxv;
 				${stateCreationString}.discs[i].syv = discInfo.syv;
 				${stateCreationString}.discs[i].spawnTeamInfo = discInfo.spawnTeamInfo;
 				${stateCreationString}.discs[i].team = discInfo.team;
